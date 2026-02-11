@@ -28,16 +28,19 @@ Subagent 提供了灵活的配置管理系统，支持：
 配置文件默认保存在用户主目录：
 
 **Windows:**
+
 ```
 C:\Users\<YourUsername>\.subagent_config.json
 ```
 
 **Linux/macOS:**
+
 ```
 ~/.subagent_config.json
 ```
 
 配置文件格式示例：
+
 ```json
 {
   "api_keys": {
@@ -71,6 +74,7 @@ Subagent 按以下优先级读取配置：
    - 各提供商的官方 API 端点
 
 这种设计允许您：
+
 - 在配置文件中设置常用密钥
 - 临时使用环境变量覆盖配置
 - 在不同项目中灵活切换配置
@@ -82,14 +86,17 @@ Subagent 按以下优先级读取配置：
 设置 API 配置并持久化保存。
 
 **参数:**
+
 - `provider` (str): 提供商名称，支持 "openai"、"anthropic"、"zhipuai"
 - `api_key` (str): API 密钥
 - `api_base` (str, 可选): API 基础 URL
 
 **返回:**
+
 - JSON 格式的配置结果，包含密钥预览和配置文件路径
 
 **示例:**
+
 ```python
 # 设置 OpenAI API
 result = subagent_config_set(
@@ -116,9 +123,11 @@ result = subagent_config_set(
 获取指定提供商的配置信息（密钥已脱敏）。
 
 **参数:**
+
 - `provider` (str): 提供商名称
 
 **返回:**
+
 - JSON 格式的配置信息，包括：
   - 脱敏后的密钥预览
   - API 基础 URL
@@ -126,6 +135,7 @@ result = subagent_config_set(
   - 配置文件路径
 
 **示例:**
+
 ```python
 # 查询 OpenAI 配置
 config = subagent_config_get("openai")
@@ -146,12 +156,15 @@ print(config)
 列出所有已配置的提供商。
 
 **参数:**
+
 - 无
 
 **返回:**
+
 - JSON 格式的提供商列表，包含每个提供商的配置状态
 
 **示例:**
+
 ```python
 # 列出所有配置
 providers = subagent_config_list()
@@ -310,6 +323,7 @@ ls -la ~/.subagent_config.json
 ### 2. 不要提交配置文件
 
 在 `.gitignore` 中添加：
+
 ```gitignore
 .subagent_config.json
 *_config.json
@@ -329,6 +343,7 @@ env:
 ### 4. 定期轮换密钥
 
 建议定期更新 API 密钥：
+
 ```python
 # 更新密钥
 subagent_config_set("openai", "sk-new-key")
@@ -358,6 +373,7 @@ else:
 ### Q1: 配置文件在哪里？
 
 **A:** 使用 `subagent_config_list()` 查看配置文件路径：
+
 ```python
 result = json.loads(subagent_config_list())
 print(result['config_file'])
@@ -370,6 +386,7 @@ print(result['config_file'])
 ### Q3: 如何删除某个提供商的配置？
 
 **A:** 手动编辑配置文件，或使用代码：
+
 ```python
 from mcp_server.tools.subagent_config import get_config
 
@@ -380,6 +397,7 @@ config.remove_api_key("openai")
 ### Q4: 配置文件损坏怎么办？
 
 **A:** 删除配置文件，系统会自动创建新的：
+
 ```bash
 # Unix/Linux/macOS
 rm ~/.subagent_config.json
@@ -395,6 +413,7 @@ del %USERPROFILE%\.subagent_config.json
 ### Q6: 如何备份配置？
 
 **A:** 使用导出功能：
+
 ```python
 from mcp_server.tools.subagent_config import get_config
 
@@ -407,6 +426,7 @@ with open("config_backup.json", "w") as f:
 ### Q7: 支持团队共享配置吗？
 
 **A:** 不推荐共享配置文件。建议每个用户：
+
 - 使用自己的 API 密钥
 - 在团队文档中标准化 API 端点设置
 - 通过环境变量管理密钥
@@ -414,6 +434,7 @@ with open("config_backup.json", "w") as f:
 ### Q8: 如何迁移到新电脑？
 
 **A:** 复制配置文件到新电脑的对应位置：
+
 ```bash
 # 从旧电脑
 scp ~/.subagent_config.json user@newpc:~/
@@ -439,6 +460,7 @@ Subagent 的配置管理系统提供了：
 ---
 
 **相关文档:**
+
 - [Subagent 使用指南](./SUBAGENT_GUIDE.md)
 - [ZhipuAI 集成指南](./ZHIPUAI_GUIDE.md)
 - [API 参考文档](./SUBAGENT_API.md)

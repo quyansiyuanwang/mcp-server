@@ -19,17 +19,25 @@ python configure.py
 ```
 
 配置向导将引导你完成以下步骤：
+
 1. **环境检查** - 验证 Python 版本和依赖工具
 2. **安装依赖** - 自动安装项目依赖包
-3. **配置 Subagent API** - 设置 AI 提供商的 API 密钥
-4. **Claude Desktop 集成** - 配置 Claude Desktop 使用此 MCP 服务器
+3. **启用/禁用 Subagent** - 选择是否启用 AI 任务委托功能
+4. **配置 Subagent API** - 设置 AI 提供商的 API 密钥（如果启用）
+5. **Claude Desktop 集成** - 配置 Claude Desktop 使用此 MCP 服务器
 
 ### 非交互式配置
 
 如果已知配置参数，可以使用命令行参数直接配置：
 
 ```bash
-# 配置 OpenAI
+# 启用 Subagent（不配置提供商）
+uv run configure.py --enable-subagent --skip-deps --skip-claude
+
+# 禁用 Subagent
+uv run configure.py --disable-subagent --skip-deps --skip-claude
+
+# 配置 OpenAI（自动启用 Subagent）
 uv run configure.py --provider openai --api-key sk-xxx
 
 # 配置多个提供商
@@ -49,6 +57,7 @@ uv run configure.py --skip-claude --provider openai --api-key sk-xxx
 ### 1. 环境检查
 
 脚本会自动检查：
+
 - ✅ Python 版本（需要 3.12+）
 - ✅ 虚拟环境（推荐但非必需）
 - ✅ 包管理器（pip 或 uv）
@@ -56,29 +65,104 @@ uv run configure.py --skip-claude --provider openai --api-key sk-xxx
 ### 2. 安装依赖
 
 支持两种安装方式：
+
 - **uv**（推荐）- 更快的安装速度
 - **pip** - 标准 Python 包管理器
 
 跳过依赖安装：
+
 ```bash
 uv run configure.py --skip-deps
 ```
 
-### 3. 配置 Subagent API
+### 3. 启用/禁用 Subagent 功能
+
+Subagent 是一个可选功能，允许 Claude 将复杂任务委托给其他 AI 模型（如 OpenAI GPT、Anthropic Claude）。
+
+#### 为什么要禁用 Subagent？
+
+- **隐私考虑** - 不希望数据发送到外部 AI 服务
+- **成本控制** - 避免产生额外的 API 调用费用
+- **简化配置** - 只使用本地 MCP 工具，不需要外部 AI 集成
+
+#### 交互式配置
+
+在交互模式下，脚本会询问：
+
+```
+Enable Subagent feature? (y/n):
+```
+
+- 选择 `y` - 启用 Subagent，继续配置 API 密钥
+- 选择 `n` - 禁用 Subagent，跳过 API 配置
+
+#### 命令行配置
+
+```bash
+# 启用 Subagent
+uv run configure.py --enable-subagent --skip-deps --skip-claude
+
+# 禁用 Subagent
+uv run configure.py --disable-subagent --skip-deps --skip-claude
+
+# 配置提供商时自动启用
+uv run configure.py --provider openai --api-key sk-xxx
+```
+
+#### 修改现有配置
+
+随时可以通过重新运行脚本来修改设置：
+
+```bash
+# 从启用改为禁用
+uv run configure.py --disable-subagent --skip-deps --skip-claude
+
+# 从禁用改为启用
+uv run configure.py --enable-subagent --skip-deps --skip-claude
+```
+
+#### 配置文件
+
+Subagent 状态保存在配置文件中：
+
+```json
+{
+  "enable_subagent": true,
+  "api_keys": { ... },
+  "api_bases": { ... }
+}
+```
+
+#### 环境变量
+
+也可以通过环境变量控制（优先级高于配置文件）：
+
+```bash
+# 启用
+export ENABLE_SUBAGENT=true
+
+# 禁用
+export ENABLE_SUBAGENT=false
+```
+
+### 4. 配置 Subagent API
+
+**注意：** 此步骤仅在启用 Subagent 功能时需要。
 
 Subagent 允许 Claude 将复杂任务委托给其他 AI 模型。
 
 #### 支持的 AI 提供商
 
-| 提供商 | 说明 | API Key 格式 | 文档 |
-|--------|------|--------------|------|
-| **OpenAI** | GPT-4, GPT-3.5 等模型 | `sk-...` | [OpenAI Docs](https://platform.openai.com/docs) |
-| **Anthropic** | Claude 模型 | `sk-ant-...` | [Anthropic Docs](https://docs.anthropic.com) |
-| **ZhipuAI** | 智谱 AI（GLM 模型） | `xxxxxxxx.xxxxxxxxxx` | [ZhipuAI 指南](./ZHIPUAI_GUIDE.md) |
+| 提供商        | 说明                  | API Key 格式          | 文档                                            |
+| ------------- | --------------------- | --------------------- | ----------------------------------------------- |
+| **OpenAI**    | GPT-4, GPT-3.5 等模型 | `sk-...`              | [OpenAI Docs](https://platform.openai.com/docs) |
+| **Anthropic** | Claude 模型           | `sk-ant-...`          | [Anthropic Docs](https://docs.anthropic.com)    |
+| **ZhipuAI**   | 智谱 AI（GLM 模型）   | `xxxxxxxx.xxxxxxxxxx` | [ZhipuAI 指南](./ZHIPUAI_GUIDE.md)              |
 
 #### 交互式配置
 
 在交互模式下，脚本会：
+
 1. 显示可用的提供商列表
 2. 询问是否配置每个提供商
 3. 安全地收集 API 密钥（隐藏输入）
@@ -100,10 +184,12 @@ uv run configure.py \
 #### 配置文件位置
 
 API 配置保存在：
+
 - **Windows**: `C:\Users\<用户名>\.subagent_config.json`
 - **macOS/Linux**: `~/.subagent_config.json`
 
 配置文件格式：
+
 ```json
 {
   "api_keys": {
@@ -119,13 +205,14 @@ API 配置保存在：
 }
 ```
 
-### 4. Claude Desktop 集成
+### 5. Claude Desktop 集成
 
 脚本可以自动配置 Claude Desktop 使用此 MCP 服务器。
 
 #### 自动检测
 
 脚本会自动检测 Claude Desktop 配置文件位置：
+
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
@@ -146,15 +233,15 @@ python -m mcp_server.cli.config --claude
 
 ### 命令行参数
 
-| 参数 | 说明 | 示例 |
-|------|------|------|
-| `--provider` | 指定 AI 提供商 | `--provider openai` |
-| `--api-key` | 提供商的 API 密钥 | `--api-key sk-xxx` |
-| `--api-base` | 自定义 API Base URL | `--api-base https://api.example.com/v1` |
-| `--skip-deps` | 跳过依赖安装 | `--skip-deps` |
-| `--skip-claude` | 跳过 Claude Desktop 配置 | `--skip-claude` |
-| `--no-color` | 禁用彩色输出 | `--no-color` |
-| `-h, --help` | 显示帮助信息 | `--help` |
+| 参数            | 说明                     | 示例                                    |
+| --------------- | ------------------------ | --------------------------------------- |
+| `--provider`    | 指定 AI 提供商           | `--provider openai`                     |
+| `--api-key`     | 提供商的 API 密钥        | `--api-key sk-xxx`                      |
+| `--api-base`    | 自定义 API Base URL      | `--api-base https://api.example.com/v1` |
+| `--skip-deps`   | 跳过依赖安装             | `--skip-deps`                           |
+| `--skip-claude` | 跳过 Claude Desktop 配置 | `--skip-claude`                         |
+| `--no-color`    | 禁用彩色输出             | `--no-color`                            |
+| `-h, --help`    | 显示帮助信息             | `--help`                                |
 
 ### 多提供商配置
 
@@ -212,6 +299,7 @@ mcp-server
 **A**: 可以，但强烈推荐使用虚拟环境以避免依赖冲突。
 
 创建虚拟环境：
+
 ```bash
 # 使用 venv
 python -m venv .venv
@@ -229,6 +317,7 @@ source .venv/bin/activate  # Linux/macOS
 **A**: uv 是更现代、更快的 Python 包管理器。脚本会优先使用 uv，如果不可用则使用 pip。
 
 安装 uv：
+
 ```bash
 # Windows (PowerShell)
 irm https://astral.sh/uv/install.ps1 | iex
@@ -254,6 +343,7 @@ uv run configure.py
 ### Q: Claude Desktop 配置不生效？
 
 **A**: 请确保：
+
 1. 配置文件保存在正确的位置
 2. JSON 格式正确（可以用 `python -m json.tool` 验证）
 3. **已重启 Claude Desktop**
@@ -271,11 +361,13 @@ uv run configure.py
 配置完成后，你可以：
 
 1. **测试配置**
+
    ```bash
    python examples/subagent_config_example.py
    ```
 
 2. **运行 MCP 服务器**
+
    ```bash
    mcp-server
    ```
@@ -294,11 +386,13 @@ uv run configure.py
 ### 环境变量
 
 配置优先级（从高到低）：
+
 1. 环境变量
 2. 配置文件 (`~/.subagent_config.json`)
 3. 默认值
 
 支持的环境变量：
+
 ```bash
 # OpenAI
 export OPENAI_API_KEY="sk-xxx"
@@ -353,6 +447,7 @@ uv pip install -e .
 ### 导入错误
 
 确保依赖已安装：
+
 ```bash
 uv run configure.py  # 不要跳过依赖安装
 ```
@@ -367,6 +462,7 @@ chmod 600 ~/.subagent_config.json
 ### Windows 编码问题
 
 使用 `--no-color` 参数禁用彩色输出：
+
 ```bash
 uv run configure.py --no-color
 ```
@@ -383,6 +479,7 @@ uv run configure.py --no-color
 ## 支持
 
 如有问题或建议，请：
+
 - 查看 [文档目录](./README.md)
 - 提交 [Issue](https://github.com/your-repo/mcp-server/issues)
 - 参考 [示例代码](../examples/)

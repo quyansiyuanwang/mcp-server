@@ -434,6 +434,17 @@ def show_config_summary():
     print(f"{Colors.BOLD}Subagent Configuration:{Colors.ENDC}")
     print(f"  Config file: {config.config_path}")
 
+    # Show enable/disable status
+    enabled = config.get_enable_subagent()
+    status_color = Colors.OKGREEN if enabled else Colors.WARNING
+    status_text = "ENABLED" if enabled else "DISABLED"
+    print(f"  Status: {status_color}{status_text}{Colors.ENDC}")
+
+    if not enabled:
+        print_warning("  Subagent is disabled - AI delegation features will not work")
+        print_info("  Enable it by running: uv run configure.py\\n")
+        return
+
     providers_info = get_provider_info()
     configured_any = False
 
@@ -453,7 +464,8 @@ def show_config_summary():
             print(f"      API Base: {api_base}")
 
     if not configured_any:
-        print_info("  No providers configured yet")
+        print_warning("  Subagent is enabled but no providers configured")
+        print_info("  Configure providers by running: uv run configure.py")
 
 
 def show_next_steps():
@@ -524,30 +536,46 @@ def interactive_setup():
         print_warning("Make sure to install dependencies later: pip install -e .")
 
     # Stage 3: Subagent Configuration
-    print_header("Stage 3: Configure Subagent API")
+    print_header("Stage 3: Configure Subagent Feature")
     print("Subagent allows Claude to delegate complex tasks to other AI models.")
+    print("This feature requires API credentials from AI providers (OpenAI/Anthropic/ZhipuAI).\n")
 
-    configure_subagent_now = (
-        input("\nConfigure Subagent API credentials now? (y/n): ").strip().lower()
-    )
+    enable_subagent = input("Enable Subagent feature? (y/n): ").strip().lower()
 
-    if configure_subagent_now in ["y", "yes"]:
-        selected_providers = select_providers_interactive()
+    config = get_subagent_config()
+    if enable_subagent in ["y", "yes"]:
+        # Enable subagent
+        if config:
+            config.set_enable_subagent(True)
+            print_success("Subagent feature enabled")
 
-        if selected_providers:
-            success_count = 0
-            for provider in selected_providers:
-                if configure_provider_interactive(provider):
-                    success_count += 1
+        # Configure API credentials
+        configure_api = input("\nConfigure API credentials now? (y/n): ").strip().lower()
 
-            print(
-                f"\n{Colors.OKGREEN}Configured {success_count}/{len(selected_providers)} providers{Colors.ENDC}"
-            )
+        if configure_api in ["y", "yes"]:
+            selected_providers = select_providers_interactive()
+
+            if selected_providers:
+                success_count = 0
+                for provider in selected_providers:
+                    if configure_provider_interactive(provider):
+                        success_count += 1
+
+                print(
+                    f"\n{Colors.OKGREEN}Configured {success_count}/{len(selected_providers)} providers{Colors.ENDC}"
+                )
+            else:
+                print_info("No providers selected")
         else:
-            print_info("No providers selected")
+            print_info("API credentials not configured")
+            print_warning("Subagent will be enabled but won't work without API credentials")
+            print_info("Configure them later by running this script again")
     else:
-        print_info("Skipping Subagent configuration")
-        print_info("You can configure it later by running this script again")
+        # Disable subagent
+        if config:
+            config.set_enable_subagent(False)
+            print_info("Subagent feature disabled")
+        print_info("You can enable it later by running this script again")
 
     # Show current configuration
     show_config_summary()
@@ -580,18 +608,24 @@ Examples:
   Interactive mode:
     uv run configure.py
   
-  Configure OpenAI only:
+  Enable Subagent without configuring providers:
+    uv run configure.py --enable-subagent --skip-deps --skip-claude
+  
+  Disable Subagent:
+    uv run configure.py --disable-subagent --skip-deps --skip-claude
+  
+  Configure OpenAI (automatically enables Subagent):
     uv run configure.py --provider openai --api-key sk-xxx
   
   Configure multiple providers:
-    uv run configure.py --provider openai --api-key sk-xxx \
+    uv run configure.py --provider openai --api-key sk-xxx \\
                         --provider anthropic --api-key sk-ant-xxx
   
   Skip dependency installation:
     uv run configure.py --skip-deps
   
   Full non-interactive setup:
-    uv run configure.py --provider openai --api-key sk-xxx --skip-claude
+    uv run configure.py --enable-subagent --provider openai --api-key sk-xxx --skip-claude
         """,
     )
 
@@ -601,6 +635,17 @@ Examples:
         "--skip-claude", action="store_true", help="Skip Claude Desktop configuration"
     )
     parser.add_argument("--no-color", action="store_true", help="Disable colored output")
+
+    # Subagent control (mutually exclusive)
+    subagent_group = parser.add_mutually_exclusive_group()
+    subagent_group.add_argument(
+        "--enable-subagent",
+        action="store_true",
+        help="Enable Subagent feature (default if providers specified)",
+    )
+    subagent_group.add_argument(
+        "--disable-subagent", action="store_true", help="Disable Subagent feature"
+    )
 
     # Provider configuration (can be repeated)
     parser.add_argument(
@@ -671,8 +716,24 @@ def noninteractive_setup(args):
     else:
         print_info("Skipping dependency installation (--skip-deps)")
 
-    # Subagent configuration
+    # Subagent enable/disable
+    config = get_subagent_config()
+    if config:
+        if args.disable_subagent:
+            config.set_enable_subagent(False)
+            print_info("Subagent feature disabled")
+        elif args.enable_subagent or args.providers:
+            # Enable if explicitly requested or if providers are being configured
+            config.set_enable_subagent(True)
+            print_success("Subagent feature enabled")
+
+    # Subagent provider configuration
     if args.providers:
+        if args.disable_subagent:
+            print_warning("--disable-subagent conflicts with --provider, ignoring disable")
+            if config:
+                config.set_enable_subagent(True)
+
         print_info(f"Configuring {len(args.providers)} provider(s)...")
         success_count = 0
 

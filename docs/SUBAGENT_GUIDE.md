@@ -39,6 +39,7 @@ subagent_config_set("openai", "sk-xxx", "https://api.openai-proxy.com/v1")
 配置将保存到 `~/.subagent_config.json`，下次启动自动加载。
 
 **查看配置:**
+
 ```python
 from mcp_server.tools.subagent import subagent_config_list
 print(subagent_config_list())
@@ -62,6 +63,7 @@ export ZHIPUAI_API_KEY="your-api-key.xxxx"
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 $env:OPENAI_API_KEY = "sk-..."
 $env:ANTHROPIC_API_KEY = "sk-ant-..."
@@ -95,15 +97,16 @@ export ZHIPUAI_API_BASE="https://open.bigmodel.cn/api/paas/v4"
 
 **参数：**
 
-| 参数 | 类型 | 必需 | 描述 |
-|------|------|------|------|
-| `provider` | string | ✓ | AI 提供商：`"openai"` 或 `"anthropic"` |
-| `model` | string | ✓ | 模型名称（见下方支持的模型列表） |
-| `messages` | string | ✓ | JSON 格式的消息列表 |
-| `max_tokens` | int | ✗ | 最大生成 token 数（默认：自动，上限 32000） |
-| `temperature` | float | ✗ | 温度参数 0.0-2.0（默认：0.7） |
+| 参数          | 类型   | 必需 | 描述                                        |
+| ------------- | ------ | ---- | ------------------------------------------- |
+| `provider`    | string | ✓    | AI 提供商：`"openai"` 或 `"anthropic"`      |
+| `model`       | string | ✓    | 模型名称（见下方支持的模型列表）            |
+| `messages`    | string | ✓    | JSON 格式的消息列表                         |
+| `max_tokens`  | int    | ✗    | 最大生成 token 数（默认：自动，上限 32000） |
+| `temperature` | float  | ✗    | 温度参数 0.0-2.0（默认：0.7）               |
 
 **返回：**
+
 ```json
 {
   "result": "AI 生成的响应文本",
@@ -177,19 +180,20 @@ result = subagent_call(
 
 **参数：**
 
-| 参数 | 类型 | 必需 | 描述 |
-|------|------|------|------|
-| `tasks` | string | ✓ | JSON 格式的任务列表 |
-| `max_workers` | int | ✗ | 最大并发数（默认：3，上限 10） |
+| 参数          | 类型   | 必需 | 描述                           |
+| ------------- | ------ | ---- | ------------------------------ |
+| `tasks`       | string | ✓    | JSON 格式的任务列表            |
+| `max_workers` | int    | ✗    | 最大并发数（默认：3，上限 10） |
 
 **任务格式：**
+
 ```json
 [
   {
     "name": "task1",
     "provider": "openai",
     "model": "gpt-3.5-turbo",
-    "messages": [{"role": "user", "content": "..."}],
+    "messages": [{ "role": "user", "content": "..." }],
     "max_tokens": 500,
     "temperature": 0.7
   },
@@ -197,12 +201,13 @@ result = subagent_call(
     "name": "task2",
     "provider": "anthropic",
     "model": "claude-3-haiku-20240307",
-    "messages": [{"role": "user", "content": "..."}]
+    "messages": [{ "role": "user", "content": "..." }]
   }
 ]
 ```
 
 **返回：**
+
 ```json
 {
   "results": [
@@ -303,13 +308,14 @@ result = subagent_parallel(tasks=json.dumps(tasks), max_workers=3)
 
 **参数：**
 
-| 参数 | 类型 | 必需 | 描述 |
-|------|------|------|------|
-| `condition_task` | string | ✓ | 用于评估条件的任务（JSON） |
-| `true_task` | string | ✓ | 条件为真时执行的任务（JSON） |
-| `false_task` | string | ✓ | 条件为假时执行的任务（JSON） |
+| 参数             | 类型   | 必需 | 描述                         |
+| ---------------- | ------ | ---- | ---------------------------- |
+| `condition_task` | string | ✓    | 用于评估条件的任务（JSON）   |
+| `true_task`      | string | ✓    | 条件为真时执行的任务（JSON） |
+| `false_task`     | string | ✓    | 条件为假时执行的任务（JSON） |
 
 **返回：**
+
 ```json
 {
   "condition_result": {
@@ -386,13 +392,14 @@ print(f"Branch taken: {result['branch_taken']}")
 
 **参数：**
 
-| 参数 | 类型 | 必需 | 描述 |
-|------|------|------|------|
-| `provider` | string | ✓ | 提供商：`"openai"` `"anthropic"` `"zhipuai"` |
-| `api_key` | string | ✓ | API 密钥 |
-| `api_base` | string | ✗ | API 基础 URL（可选） |
+| 参数       | 类型   | 必需 | 描述                                         |
+| ---------- | ------ | ---- | -------------------------------------------- |
+| `provider` | string | ✓    | 提供商：`"openai"` `"anthropic"` `"zhipuai"` |
+| `api_key`  | string | ✓    | API 密钥                                     |
+| `api_base` | string | ✗    | API 基础 URL（可选）                         |
 
 **返回：**
+
 ```json
 {
   "provider": "openai",
@@ -423,11 +430,12 @@ subagent_config_set("zhipuai", "your-api-key.xxxxxxxxxx")
 
 **参数：**
 
-| 参数 | 类型 | 必需 | 描述 |
-|------|------|------|------|
-| `provider` | string | ✓ | 提供商名称 |
+| 参数       | 类型   | 必需 | 描述       |
+| ---------- | ------ | ---- | ---------- |
+| `provider` | string | ✓    | 提供商名称 |
 
 **返回：**
+
 ```json
 {
   "provider": "openai",
@@ -453,6 +461,7 @@ print(f"OpenAI 配置来源: {config['source']}")
 列出所有已配置的 AI 提供商及其状态。
 
 **返回：**
+
 ```json
 {
   "providers": {
@@ -483,7 +492,8 @@ print(f"已配置 {providers['total_configured']} 个提供商")
 
 📚 **完整配置管理文档**: [Subagent 配置管理指南](./SUBAGENT_CONFIG.md)
 print(f"Final result: {result['final_result']['result']}")
-```
+
+````
 
 ```python
 # 根据情感分析结果选择响应方式
@@ -519,41 +529,42 @@ result = subagent_conditional(
     true_task=json.dumps(true_task),
     false_task=json.dumps(false_task)
 )
-```
+````
 
 ## 支持的模型
 
 ### OpenAI 模型
 
-| 模型 | 输入价格 | 输出价格 | 上下文窗口 | 适用场景 |
-|------|---------|---------|-----------|----------|
-| `gpt-3.5-turbo` | $0.0015/1K | $0.002/1K | 16K | 快速、经济的通用任务 |
-| `gpt-4` | $0.03/1K | $0.06/1K | 8K | 复杂推理、高质量输出 |
-| `gpt-4-turbo` | $0.01/1K | $0.03/1K | 128K | 长文本处理 |
-| `gpt-4o` | $0.005/1K | $0.015/1K | 128K | 最新多模态模型 |
-| `gpt-4o-mini` | $0.00015/1K | $0.0006/1K | 128K | 最经济的小型模型 |
+| 模型            | 输入价格    | 输出价格   | 上下文窗口 | 适用场景             |
+| --------------- | ----------- | ---------- | ---------- | -------------------- |
+| `gpt-3.5-turbo` | $0.0015/1K  | $0.002/1K  | 16K        | 快速、经济的通用任务 |
+| `gpt-4`         | $0.03/1K    | $0.06/1K   | 8K         | 复杂推理、高质量输出 |
+| `gpt-4-turbo`   | $0.01/1K    | $0.03/1K   | 128K       | 长文本处理           |
+| `gpt-4o`        | $0.005/1K   | $0.015/1K  | 128K       | 最新多模态模型       |
+| `gpt-4o-mini`   | $0.00015/1K | $0.0006/1K | 128K       | 最经济的小型模型     |
 
 ### Anthropic Claude 模型
 
-| 模型 | 输入价格 | 输出价格 | 上下文窗口 | 适用场景 |
-|------|---------|---------|-----------|----------|
-| `claude-3-haiku-20240307` | $0.00025/1K | $0.00125/1K | 200K | 快速响应、简单任务 |
-| `claude-3-5-haiku-20241022` | $0.001/1K | $0.005/1K | 200K | 升级版 Haiku |
-| `claude-3-sonnet-20240229` | $0.003/1K | $0.015/1K | 200K | 平衡性能和成本 |
-| `claude-3-5-sonnet-20241022` | $0.003/1K | $0.015/1K | 200K | 最新最强 Claude |
-| `claude-3-opus-20240229` | $0.015/1K | $0.075/1K | 200K | 最高质量推理 |
+| 模型                         | 输入价格    | 输出价格    | 上下文窗口 | 适用场景           |
+| ---------------------------- | ----------- | ----------- | ---------- | ------------------ |
+| `claude-3-haiku-20240307`    | $0.00025/1K | $0.00125/1K | 200K       | 快速响应、简单任务 |
+| `claude-3-5-haiku-20241022`  | $0.001/1K   | $0.005/1K   | 200K       | 升级版 Haiku       |
+| `claude-3-sonnet-20240229`   | $0.003/1K   | $0.015/1K   | 200K       | 平衡性能和成本     |
+| `claude-3-5-sonnet-20241022` | $0.003/1K   | $0.015/1K   | 200K       | 最新最强 Claude    |
+| `claude-3-opus-20240229`     | $0.015/1K   | $0.075/1K   | 200K       | 最高质量推理       |
 
 ### ZhipuAI GLM 模型
 
-| 模型 | 输入价格 | 输出价格 | 上下文窗口 | 适用场景 |
-|------|---------|---------|-----------|----------|
-| `glm-4-flash` | 免费 | 免费 | 128K | 免费试用、测试开发 |
-| `glm-4-air` | ¥0.01/1K | ¥0.01/1K | 128K | 最经济的中文模型 |
-| `glm-4` | ¥0.1/1K | ¥0.1/1K | 128K | 平衡性能和成本 |
-| `glm-4-airx` | ¥0.1/1K | ¥0.1/1K | 8K | 快速响应 |
-| `glm-4-plus` | ¥0.5/1K | ¥0.5/1K | 128K | 最强中文理解和生成 |
+| 模型          | 输入价格 | 输出价格 | 上下文窗口 | 适用场景           |
+| ------------- | -------- | -------- | ---------- | ------------------ |
+| `glm-4-flash` | 免费     | 免费     | 128K       | 免费试用、测试开发 |
+| `glm-4-air`   | ¥0.01/1K | ¥0.01/1K | 128K       | 最经济的中文模型   |
+| `glm-4`       | ¥0.1/1K  | ¥0.1/1K  | 128K       | 平衡性能和成本     |
+| `glm-4-airx`  | ¥0.1/1K  | ¥0.1/1K  | 8K         | 快速响应           |
+| `glm-4-plus`  | ¥0.5/1K  | ¥0.5/1K  | 128K       | 最强中文理解和生成 |
 
 > **注意**：
+>
 > - ZhipuAI 价格以人民币计价
 > - 上表价格已按 1 USD ≈ 7 CNY 转换为美元等效价格用于成本计算
 > - 实际费用以智谱AI官方定价为准
@@ -571,6 +582,7 @@ Subagent 使用字符近似算法估算 token 数量：
 **准确性**：误差约 ±10%，足够用于成本预估。
 
 **示例**：
+
 ```python
 text = "Hello world, this is a test."  # 29 characters
 # 估算: 29 / 4 ≈ 7 tokens
@@ -580,6 +592,7 @@ text_cn = "你好世界，这是测试。"  # 10 characters
 ```
 
 如需精确 token 计数，建议使用：
+
 - OpenAI: `tiktoken` 库
 - Anthropic: `anthropic-tokenizer` 库
 
@@ -647,6 +660,7 @@ print(f"Total parallel cost: ${result['summary']['total_cost']}")
 **错误**：`OPENAI_API_KEY environment variable not set`
 
 **解决**：
+
 ```bash
 export OPENAI_API_KEY="sk-..."
 export ANTHROPIC_API_KEY="sk-ant-..."
@@ -663,6 +677,7 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 **错误**：`API rate limit exceeded`
 
 **解决**：
+
 - 减少并发数：`max_workers=1`
 - 等待后重试
 - 升级 API 套餐
@@ -672,6 +687,7 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 **错误**：`API timeout after 300s`
 
 **解决**：
+
 - 减少 `max_tokens` 以加快生成
 - 检查网络连接
 - 使用更快的模型（如 `gpt-3.5-turbo`）
@@ -681,6 +697,7 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 **错误**：`max_tokens cannot exceed 32000`
 
 **解决**：
+
 - 减少输入文本长度
 - 分批处理长文本
 - 使用支持更大上下文的模型
@@ -694,6 +711,7 @@ Subagent 自动重试失败的 API 调用（最多 3 次）：
 - **退避系数**：2.0（指数退避）
 
 重试场景：
+
 - 网络超时
 - 503 服务不可用
 - 临时性网络错误
@@ -709,6 +727,7 @@ Subagent 自动重试失败的 API 调用（最多 3 次）：
 ### 敏感词过滤
 
 以下关键词在日志中自动脱敏：
+
 - `PASSWORD`
 - `SECRET`
 - `TOKEN`
@@ -729,7 +748,7 @@ Subagent 自动重试失败的 API 调用（最多 3 次）：
 ```python
 def multi_turn_conversation(user_query):
     """多轮对话示例"""
-    
+
     # 第一轮：分析用户意图
     intent_task = {
         "provider": "openai",
@@ -739,10 +758,10 @@ def multi_turn_conversation(user_query):
             "content": f"Analyze user intent: '{user_query}'"
         }]
     }
-    
+
     intent_result = subagent_call(**intent_task)
     intent = intent_result["result"]
-    
+
     # 第二轮：根据意图生成响应
     response_task = {
         "provider": "openai",
@@ -754,7 +773,7 @@ def multi_turn_conversation(user_query):
             {"role": "user", "content": "Provide a detailed response."}
         ]
     }
-    
+
     return subagent_call(**response_task)
 ```
 
@@ -763,7 +782,7 @@ def multi_turn_conversation(user_query):
 ```python
 def analyze_document(document_text):
     """并行分析文档的多个维度"""
-    
+
     tasks = [
         {
             "name": "extract_entities",
@@ -802,12 +821,12 @@ def analyze_document(document_text):
             }]
         }
     ]
-    
+
     result = subagent_parallel(
         tasks=json.dumps(tasks),
         max_workers=4
     )
-    
+
     return result
 ```
 
@@ -816,20 +835,20 @@ def analyze_document(document_text):
 ```python
 def smart_routing(user_message):
     """根据消息复杂度选择模型"""
-    
+
     # 评估消息复杂度
     condition_task = {
         "provider": "openai",
         "model": "gpt-3.5-turbo",
         "messages": [{
             "role": "user",
-            "content": f"""Is this question complex and requires deep reasoning? 
+            "content": f"""Is this question complex and requires deep reasoning?
             Question: '{user_message}'
             Reply only 'true' or 'false'"""
         }],
         "temperature": 0.1
     }
-    
+
     # 复杂问题用 GPT-4
     complex_task = {
         "provider": "openai",
@@ -837,7 +856,7 @@ def smart_routing(user_message):
         "messages": [{"role": "user", "content": user_message}],
         "max_tokens": 2000
     }
-    
+
     # 简单问题用 GPT-3.5
     simple_task = {
         "provider": "openai",
@@ -845,13 +864,13 @@ def smart_routing(user_message):
         "messages": [{"role": "user", "content": user_message}],
         "max_tokens": 500
     }
-    
+
     result = subagent_conditional(
         condition_task=json.dumps(condition_task),
         true_task=json.dumps(complex_task),
         false_task=json.dumps(simple_task)
     )
-    
+
     return result
 ```
 
@@ -860,17 +879,17 @@ def smart_routing(user_message):
 ```python
 def self_improving_generation(prompt):
     """生成 -> 评估 -> 改进循环"""
-    
+
     # 第一步：生成初稿
     draft_task = {
         "provider": "openai",
         "model": "gpt-4",
         "messages": [{"role": "user", "content": prompt}]
     }
-    
+
     draft_result = subagent_call(**draft_task)
     draft = draft_result["result"]
-    
+
     # 第二步：评估质量
     eval_task = {
         "provider": "openai",
@@ -884,10 +903,10 @@ def self_improving_generation(prompt):
         }],
         "temperature": 0.1
     }
-    
+
     eval_result = subagent_call(**eval_task)
     score = float(eval_result["result"].strip())
-    
+
     # 第三步：如果质量不够，要求改进
     if score < 7:
         improve_task = {
@@ -902,9 +921,9 @@ def self_improving_generation(prompt):
                 Provide an improved version."""
             }]
         }
-        
+
         return subagent_call(**improve_task)
-    
+
     return draft_result
 ```
 
@@ -919,6 +938,7 @@ tail -f mcp_server.log | grep -i subagent
 ```
 
 日志包含：
+
 - API 调用详情
 - Token 使用统计
 - 错误信息

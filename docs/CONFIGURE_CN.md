@@ -22,11 +22,12 @@ python configure.py
 
 1. ✅ **环境检查** - 验证 Python 3.12+ 和包管理器
 2. 📦 **安装依赖** - 自动安装所有必需的包
-3. 🔑 **配置 API** - 设置 AI 提供商密钥
+3. � **启用/禁用 Subagent** - 选择是否使用 AI 任务委托功能
+4. 🔑 **配置 API** - 设置 AI 提供商密钥（如果启用 Subagent）
    - OpenAI (GPT-4/3.5)
    - Anthropic (Claude)
    - ZhipuAI (智谱 AI)
-4. 🔧 **Claude Desktop** - 自动集成到 Claude Desktop
+5. 🔧 **Claude Desktop** - 自动集成到 Claude Desktop
 
 ## 💡 使用方式
 
@@ -43,7 +44,13 @@ uv run configure.py
 如果已有 API Key，可以直接指定：
 
 ```bash
-# 配置 OpenAI
+# 启用 Subagent（不配置提供商）
+uv run configure.py --enable-subagent --skip-deps --skip-claude
+
+# 禁用 Subagent
+uv run configure.py --disable-subagent --skip-deps --skip-claude
+
+# 配置 OpenAI（自动启用 Subagent）
 uv run configure.py --provider openai --api-key sk-xxx
 
 # 配置多个提供商
@@ -58,13 +65,55 @@ uv run configure.py --skip-deps
 uv run configure.py --skip-claude
 ```
 
+## 🔌 Subagent 功能说明
+
+### 什么是 Subagent？
+
+Subagent 允许 Claude 将复杂任务委托给其他 AI 模型执行。这是一个**可选功能**。
+
+### 为什么要禁用？
+
+- 🔒 **隐私考虑** - 不希望数据发送到外部 AI 服务
+- 💰 **成本控制** - 避免产生额外的 API 费用
+- ⚡ **简化使用** - 只使用本地工具，无需外部 AI
+
+### 如何控制？
+
+**交互式配置时会询问：**
+
+```
+Enable Subagent feature? (y/n):
+```
+
+**命令行方式：**
+
+```bash
+# 启用
+uv run configure.py --enable-subagent --skip-deps --skip-claude
+
+# 禁用
+uv run configure.py --disable-subagent --skip-deps --skip-claude
+```
+
+**环境变量：**
+
+```bash
+# Windows PowerShell
+$env:ENABLE_SUBAGENT = "true"   # 启用
+$env:ENABLE_SUBAGENT = "false"  # 禁用
+
+# Linux/macOS
+export ENABLE_SUBAGENT=true     # 启用
+export ENABLE_SUBAGENT=false    # 禁用
+```
+
 ## 📖 支持的 AI 提供商
 
-| 提供商 | 说明 | 获取 API Key |
-|--------|------|-------------|
-| **OpenAI** | GPT-4, GPT-3.5 | [platform.openai.com](https://platform.openai.com/api-keys) |
-| **Anthropic** | Claude 系列 | [console.anthropic.com](https://console.anthropic.com/settings/keys) |
-| **ZhipuAI** | 智谱 AI (GLM) | [open.bigmodel.cn](https://open.bigmodel.cn) |
+| 提供商        | 说明           | 获取 API Key                                                         |
+| ------------- | -------------- | -------------------------------------------------------------------- |
+| **OpenAI**    | GPT-4, GPT-3.5 | [platform.openai.com](https://platform.openai.com/api-keys)          |
+| **Anthropic** | Claude 系列    | [console.anthropic.com](https://console.anthropic.com/settings/keys) |
+| **ZhipuAI**   | 智谱 AI (GLM)  | [open.bigmodel.cn](https://open.bigmodel.cn)                         |
 
 ## 🔧 配置文件位置
 
@@ -110,6 +159,7 @@ conda activate mcp-server
 两种方式：
 
 1. **安装 uv（推荐）**:
+
    ```powershell
    # Windows PowerShell
    irm https://astral.sh/uv/install.ps1 | iex
@@ -123,6 +173,7 @@ conda activate mcp-server
 ### 配置后 Claude Desktop 不生效？
 
 确保：
+
 1. ✅ 配置文件已正确生成
 2. ✅ **重启了 Claude Desktop**（重要！）
 3. ✅ Claude Desktop 版本支持 MCP

@@ -97,6 +97,39 @@ class SubagentConfig:
         api_keys = self._config.get("api_keys", {})
         return api_keys.get(provider.lower())
 
+    def get_enable_subagent(self) -> bool:
+        """
+        获取是否启用 Subagent 功能
+
+        优先级：环境变量 > 配置文件 > 默认值(True)
+
+        Returns:
+            是否启用 Subagent，默认为 True
+        """
+        # 首先检查环境变量
+        env_value = os.getenv("ENABLE_SUBAGENT")
+        if env_value is not None:
+            return env_value.lower() in ("true", "1", "yes", "on")
+
+        # 然后检查配置文件
+        config_value = self._config.get("enable_subagent")
+        if config_value is not None:
+            return bool(config_value)
+
+        # 默认启用
+        return True
+
+    def set_enable_subagent(self, enabled: bool) -> None:
+        """
+        设置是否启用 Subagent 功能
+
+        Args:
+            enabled: 是否启用
+        """
+        self._config["enable_subagent"] = enabled
+        self._save_config()
+        logger.info(f"Set enable_subagent to {enabled}")
+
     def get_api_base(self, provider: str) -> Optional[str]:
         """
         获取指定提供商的 API 基础 URL

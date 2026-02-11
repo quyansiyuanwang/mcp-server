@@ -6,36 +6,40 @@
 
 ## 新增功能总览
 
-| 功能 | 状态 | 说明 |
-|------|------|------|
-| 多搜索引擎支持 | ✅ | 支持 DuckDuckGo, Bing, Google, Baidu |
-| 智能缓存 | ✅ | 自动缓存结果，减少API调用 |
-| 并行搜索 | ✅ | 同时查询多个引擎 |
-| 结果去重 | ✅ | 智能去除重复结果 |
-| 高级搜索选项 | ✅ | 自定义引擎组合和参数 |
-| 限流保护 | ✅ | 防止频繁请求 |
-| 故障转移 | ✅ | 自动切换备用引擎 |
+| 功能           | 状态 | 说明                                 |
+| -------------- | ---- | ------------------------------------ |
+| 多搜索引擎支持 | ✅   | 支持 DuckDuckGo, Bing, Google, Baidu |
+| 智能缓存       | ✅   | 自动缓存结果，减少API调用            |
+| 并行搜索       | ✅   | 同时查询多个引擎                     |
+| 结果去重       | ✅   | 智能去除重复结果                     |
+| 高级搜索选项   | ✅   | 自定义引擎组合和参数                 |
+| 限流保护       | ✅   | 防止频繁请求                         |
+| 故障转移       | ✅   | 自动切换备用引擎                     |
 
 ## 1. 多搜索引擎支持
 
 ### 支持的搜索引擎
 
 #### DuckDuckGo
+
 - **特点**: 注重隐私，无广告，结果质量高
 - **适用**: 日常搜索，隐私保护场景
 - **限制**: 可能遇到速率限制
 
-#### Bing  
+#### Bing
+
 - **特点**: 微软搜索，结果全面，API稳定
 - **适用**: 综合搜索，新闻搜索
 - ** 限制**: 需要避免过度频繁请求
 
 #### Google
+
 - **特点**: 全球最大搜索引擎，结果最丰富
 - **适用**: 专业研究，学术搜索
 - **限制**: 需要处理反爬虫机制
 
 #### Baidu
+
 - **特点**: 中文搜索领先，本地化内容丰富
 - **适用**: 中文内容搜索
 - **限制**: 编码处理较复杂
@@ -125,10 +129,10 @@ get_search_stats()
 
 ### 性能对比
 
-| 模式 | 平均响应时间 | 结果覆盖面 |
-|------|------------|-----------|
-| 串行搜索 | 2-5秒 | 单引擎 |
-| 并行搜索 | 1-2秒 | 多引擎 |
+| 模式     | 平均响应时间 | 结果覆盖面 |
+| -------- | ------------ | ---------- |
+| 串行搜索 | 2-5秒        | 单引擎     |
+| 并行搜索 | 1-2秒        | 多引擎     |
 
 ### 使用建议
 
@@ -217,11 +221,13 @@ def web_search_advanced(
 ### 使用场景
 
 **场景 1: 快速搜索**
+
 ```python
 web_search_advanced("quick query", engines="duckduckgo")
 ```
 
 **场景 2: 全面搜索**
+
 ```python
 web_search_advanced(
     "comprehensive search",
@@ -232,11 +238,13 @@ web_search_advanced(
 ```
 
 **场景 3: 中文搜索**
+
 ```python
 web_search_advanced("中文内容", engines="baidu")
 ```
 
 **场景 4: 新闻搜索**
+
 ```python
 web_search_news("latest news", max_results=20)
 ```
@@ -358,11 +366,13 @@ get_search_stats() -> str
 ### 问题 1: 搜索无结果
 
 **原因**:
+
 - 所有引擎都失败
 - 网络连接问题
 - 触发限流
 
 **解决**:
+
 ```python
 # 检查限流状态
 get_search_stats()
@@ -378,11 +388,13 @@ web_search_advanced("query", engines="google,baidu")
 ### 问题 2: 响应慢
 
 **原因**:
+
 - 未启用缓存
 - 并行搜索引擎过多
 - 网络延迟
 
 **解决**:
+
 ```python
 # 启用缓存
 web_search_advanced("query", use_cache=True)
@@ -397,11 +409,13 @@ web_search_advanced("query", engines="duckduckgo")
 ### 问题 3: 频繁限流
 
 **原因**:
+
 - 请求过于频繁
 - 缓存未生效
 - TTL设置过短
 
 **解决**:
+
 ```python
 # 增加请求间隔
 import time
@@ -419,17 +433,20 @@ web_search_advanced("query", use_cache=True)
 ### 从 v1.0 升级
 
 **v1.0 代码**:
+
 ```python
 web_search("query", max_results=10)
 ```
 
 **v2.0 兼容**:
+
 ```python
 # 完全兼容，无需修改
 web_search("query", max_results=10)
 ```
 
 **v2.0 新特性**:
+
 ```python
 # 使用高级功能
 web_search_advanced(
@@ -462,11 +479,13 @@ dependencies = [
 ### 推荐配置
 
 **日常使用**:
+
 ```python
 web_search("query")  # 使用默认配置
 ```
 
 **重要查询**:
+
 ```python
 web_search_advanced(
     "important query",
@@ -477,6 +496,7 @@ web_search_advanced(
 ```
 
 **中文搜索**:
+
 ```python
 web_search_advanced("中文查询", engines="baidu,google")
 ```

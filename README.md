@@ -27,6 +27,7 @@ uv run configure.py
 ```
 
 This will guide you through:
+
 - Environment verification
 - Dependency installation
 - Subagent API configuration (OpenAI/Anthropic/ZhipuAI)
@@ -877,6 +878,7 @@ check_password_strength(password="MyP@ssw0rd123")
 **Setup Options:**
 
 **Option 1: Persistent Config (Recommended)**
+
 ```python
 # Set once, use forever
 subagent_config_set("openai", "sk-proj-xxxxxxxx")
@@ -887,6 +889,7 @@ subagent_config_list()
 ```
 
 **Option 2: Environment Variables**
+
 ```bash
 export OPENAI_API_KEY="sk-..."
 export ANTHROPIC_API_KEY="sk-ant-..."
@@ -952,11 +955,13 @@ subagent_conditional(
 - `subagent_config_list()` - List all configured providers
 
 **📖 Full Documentation:**
+
 - [docs/SUBAGENT_GUIDE.md](docs/SUBAGENT_GUIDE.md) - Complete usage guide with examples
 - [docs/SUBAGENT_CONFIG.md](docs/SUBAGENT_CONFIG.md) - Configuration management guide
 - [docs/ZHIPUAI_GUIDE.md](docs/ZHIPUAI_GUIDE.md) - ZhipuAI integration guide
 
 **💡 Examples:**
+
 - [examples/subagent_usage_example.py](examples/subagent_usage_example.py) - AI orchestration examples
 - [examples/subagent_config_example.py](examples/subagent_config_example.py) - Configuration management examples
 

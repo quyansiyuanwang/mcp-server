@@ -9,6 +9,7 @@
 ### 1. 配置管理类 (SubagentConfig)
 
 新增 `subagent_config.py` 模块，提供:
+
 - **持久化存储**: 配置自动保存到 `~/.subagent_config.json`
 - **优先级系统**: 环境变量 > 配置文件 > 默认值
 - **安全保护**: Unix/Linux/macOS 自动设置文件权限为 600
@@ -18,6 +19,7 @@
 ### 2. 三个新 MCP 工具
 
 #### `subagent_config_set`
+
 保存 API 密钥和端点到配置文件
 
 ```python
@@ -26,6 +28,7 @@ subagent_config_set("openai", "sk-xxx", "https://custom-api.com/v1")
 ```
 
 #### `subagent_config_get`
+
 查询指定提供商的配置（密钥已脱敏）
 
 ```python
@@ -34,6 +37,7 @@ config = subagent_config_get("openai")
 ```
 
 #### `subagent_config_list`
+
 列出所有已配置的提供商
 
 ```python
@@ -44,11 +48,13 @@ providers = subagent_config_list()
 ### 3. 集成更新
 
 所有 AI 客户端类已更新以使用配置管理器:
-- `OpenAIClient` 
+
+- `OpenAIClient`
 - `AnthropicClient`
 - `ZhipuAIClient`
 
 优先级逻辑:
+
 1. 环境变量（最高优先级）
 2. 配置文件
 3. 默认 API 端点
@@ -56,6 +62,7 @@ providers = subagent_config_list()
 ## 📚 新文档
 
 ### `docs/SUBAGENT_CONFIG.md` - 完整配置指南
+
 - 配置文件位置和格式
 - 配置优先级说明
 - 6 个工具的详细用法
@@ -64,6 +71,7 @@ providers = subagent_config_list()
 - 常见问题解答
 
 ### `examples/subagent_config_example.py` - 示例代码
+
 - 8 个完整示例演示所有配置功能
 - 包含集成测试和优先级演示
 
@@ -72,11 +80,13 @@ providers = subagent_config_list()
 ### 代码更新
 
 **新文件:**
+
 - `src/mcp_server/tools/subagent_config.py` (292 行)
 - `docs/SUBAGENT_CONFIG.md` (359 行)
 - `examples/subagent_config_example.py` (422 行)
 
 **修改文件:**
+
 - `src/mcp_server/tools/subagent.py` - 添加配置管理器集成和 3 个新 MCP 工具
 - `docs/SUBAGENT_GUIDE.md` - 添加持久化配置说明
 - `README.md` - 更新工具数量和配置说明
