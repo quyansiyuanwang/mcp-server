@@ -1,6 +1,6 @@
 # Comprehensive MCP Server
 
-A powerful Model Context Protocol (MCP) server with **98+ practical tools** across 11 categories, built using [FastMCP](https://github.com/jlowin/fastmcp).
+A powerful Model Context Protocol (MCP) server with **104+ practical tools** across 11 categories, built using [FastMCP](https://github.com/jlowin/fastmcp).
 
 ## 🚀 Features
 

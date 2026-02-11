@@ -3,9 +3,8 @@
 验证 main.py 是否正确从各个模块读取元数据
 """
 
-import json
-from typing import Any, Dict
 from mcp_server.main import get_all_tools_info, get_version_info, TOOL_MODULES
+
 
 def test_tool_modules_metadata() -> None:
     """测试所有模块是否都有正确的元数据"""
@@ -36,6 +35,7 @@ def test_tool_modules_metadata() -> None:
 
     print("\n所有模块元数据验证通过!")
 
+
 def test_list_all_tools() -> None:
     """测试 get_all_tools_info() 函数"""
     print("\n" + "=" * 60)
@@ -49,7 +49,7 @@ def test_list_all_tools() -> None:
     print(f"总工具数: {data['total_tools']}")
     print(f"\n类别数量: {len(data['categories'])}")
 
-    for category_key, category_info in data['categories'].items():
+    for category_key, category_info in data["categories"].items():
         print(f"\n  {category_key}:")
         print(f"    名称: {category_info['name']}")
         print(f"    描述: {category_info['description']}")
@@ -57,10 +57,11 @@ def test_list_all_tools() -> None:
         print(f"    工具列表: {', '.join(category_info['tools'][:3])}...")
 
     # 验证总数
-    calculated_total = sum(cat['count'] for cat in data['categories'].values())
-    assert data['total_tools'] == calculated_total, "工具总数不匹配"
+    calculated_total = sum(cat["count"] for cat in data["categories"].values())
+    assert data["total_tools"] == calculated_total, "工具总数不匹配"
 
     print("\nlist_all_tools() 验证通过!")
+
 
 def test_get_server_version() -> None:
     """测试 get_version_info() 函数"""
@@ -78,15 +79,16 @@ def test_get_server_version() -> None:
     print(f"总资源数: {data['total_resources']}")
 
     print("\n功能特性:")
-    for i, feature in enumerate(data['features'], 1):
+    for i, feature in enumerate(data["features"], 1):
         print(f"  {i}. {feature}")
 
     # 验证数据
-    assert data['total_tools'] == 95, f"工具总数应为 95,实际为 {data['total_tools']}"
-    assert data['total_categories'] == 10, f"类别总数应为 10,实际为 {data['total_categories']}"
-    assert len(data['features']) == 10, f"特性数量应为 10,实际为 {len(data['features'])}"
+    assert data["total_tools"] == 104, f"工具总数应为 104,实际为 {data['total_tools']}"
+    assert data["total_categories"] == 11, f"类别总数应为 11,实际为 {data['total_categories']}"
+    assert len(data["features"]) == 11, f"特性数量应为 11,实际为 {len(data['features'])}"
 
     print("\nget_server_version() 验证通过!")
+
 
 if __name__ == "__main__":
     try:
@@ -101,4 +103,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n测试失败: {e}")
         import traceback
+
         traceback.print_exc()

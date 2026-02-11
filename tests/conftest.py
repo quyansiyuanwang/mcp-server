@@ -4,7 +4,6 @@ Pytest configuration and shared fixtures for MCP server tests.
 
 import pytest
 import tempfile
-import os
 import random
 import string
 from pathlib import Path
@@ -31,6 +30,7 @@ def sample_text_file(temp_dir: Path) -> Path:
 def sample_json_file(temp_dir: Path) -> Path:
     """Create a sample JSON file for testing."""
     import json
+
     file_path = temp_dir / "sample.json"
     data = {"name": "test", "value": 123, "items": [1, 2, 3]}
     file_path.write_text(json.dumps(data, indent=2))
@@ -39,6 +39,7 @@ def sample_json_file(temp_dir: Path) -> Path:
 
 class TestConfig:
     """Test configuration - centralized settings"""
+
     def __init__(self) -> None:
         self.temp_dir = tempfile.mkdtemp(prefix="mcp_test_")
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -49,13 +50,16 @@ class TestConfig:
 
     def generate_random_text(self, length: int = 100) -> str:
         """Generate random text content"""
-        words = [''.join(random.choices(string.ascii_lowercase, k=random.randint(3, 8)))
-                 for _ in range(length // 5)]
-        return ' '.join(words)
+        words = [
+            "".join(random.choices(string.ascii_lowercase, k=random.randint(3, 8)))
+            for _ in range(length // 5)
+        ]
+        return " ".join(words)
 
     def cleanup(self) -> None:
         """Clean up temporary files"""
         import shutil
+
         if Path(self.temp_dir).exists():
             shutil.rmtree(self.temp_dir)
 

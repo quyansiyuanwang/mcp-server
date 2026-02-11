@@ -32,7 +32,7 @@ def get_server_path() -> str:
 def generate_mcp_config(
     server_name: str = "comprehensive-mcp",
     python_path: Optional[str] = None,
-    server_path: Optional[str] = None
+    server_path: Optional[str] = None,
 ) -> dict[str, Any]:
     """
     Generate MCP configuration for Claude Desktop and other clients.
@@ -82,13 +82,7 @@ def get_claude_config_path() -> Optional[Path]:
     elif sys.platform == "darwin":
         # macOS
         home = Path.home()
-        return (
-            home
-            / "Library"
-            / "Application Support"
-            / "Claude"
-            / "claude_desktop_config.json"
-        )
+        return home / "Library" / "Application Support" / "Claude" / "claude_desktop_config.json"
     else:
         # Linux
         home = Path.home()
@@ -97,7 +91,9 @@ def get_claude_config_path() -> Optional[Path]:
     return None
 
 
-def merge_with_existing_config(new_config: dict[str, Any], existing_config_path: Path) -> dict[str, Any]:
+def merge_with_existing_config(
+    new_config: dict[str, Any], existing_config_path: Path
+) -> dict[str, Any]:
     """Merge new MCP server config with existing configuration."""
     try:
         if existing_config_path.exists():
@@ -225,9 +221,7 @@ def main() -> None:
         "--port", type=int, default=8765, help="Port for HTTP server (default: 8765)"
     )
 
-    parser.add_argument(
-        "--show-config", action="store_true", help="Print configuration to console"
-    )
+    parser.add_argument("--show-config", action="store_true", help="Print configuration to console")
 
     args = parser.parse_args()
 
@@ -243,7 +237,7 @@ def main() -> None:
         claude_config_path = get_claude_config_path()
 
         if claude_config_path:
-            print(f"Installing to Claude Desktop configuration...")
+            print("Installing to Claude Desktop configuration...")
             print(f"Config path: {claude_config_path}")
 
             # Create directory if it doesn't exist
@@ -256,10 +250,8 @@ def main() -> None:
             with open(claude_config_path, "w", encoding="utf-8") as f:
                 json.dump(merged_config, f, indent=2, ensure_ascii=False)
 
-            print(f"✓ Configuration installed successfully!")
-            print(
-                f"\nServer '{args.server_name}' added to Claude Desktop configuration."
-            )
+            print("✓ Configuration installed successfully!")
+            print(f"\nServer '{args.server_name}' added to Claude Desktop configuration.")
             print("Restart Claude Desktop to use the new MCP server.")
         else:
             print("Error: Could not determine Claude Desktop configuration path")

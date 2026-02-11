@@ -15,12 +15,12 @@ import uuid
 import random
 import string
 import secrets
-from datetime import datetime, timedelta
-from typing import Any, Optional
+from datetime import datetime
+from typing import Any
 
 from dateutil import parser as date_parser
 
-from ..utils import logger, ValidationError
+from ..utils import logger
 
 # Module metadata
 CATEGORY_NAME = "Utilities"
@@ -69,9 +69,7 @@ def register_tools(mcp: Any) -> None:
             return f"Error: UUID generation failed: {str(e)}"
 
     @mcp.tool()
-    def generate_hash(
-        text: str, algorithm: str = "sha256", encoding: str = "utf-8"
-    ) -> str:
+    def generate_hash(text: str, algorithm: str = "sha256", encoding: str = "utf-8") -> str:
         """
         Generate hash of text using specified algorithm.
 
@@ -95,7 +93,9 @@ def register_tools(mcp: Any) -> None:
             elif algorithm == "sha512":
                 hasher = hashlib.sha512()
             else:
-                return f"Error: Unsupported algorithm: {algorithm}. Use md5, sha1, sha256, or sha512."
+                return (
+                    f"Error: Unsupported algorithm: {algorithm}. Use md5, sha1, sha256, or sha512."
+                )
 
             hasher.update(text.encode(encoding))
 
@@ -115,9 +115,7 @@ def register_tools(mcp: Any) -> None:
             return f'{{"error": "Hash generation failed: {str(e)}"}}'
 
     @mcp.tool()
-    def timestamp_to_date(
-        timestamp: float, format: str = "iso", timezone: str = "local"
-    ) -> str:
+    def timestamp_to_date(timestamp: float, format: str = "iso", timezone: str = "local") -> str:
         """
         Convert Unix timestamp to readable date.
 
@@ -554,9 +552,24 @@ def register_tools(mcp: Any) -> None:
 
             # 常见密码检查（简化版）
             common_passwords = [
-                "password", "123456", "12345678", "qwerty", "abc123", "monkey",
-                "letmein", "trustno1", "dragon", "baseball", "iloveyou", "master",
-                "sunshine", "ashley", "bailey", "shadow", "superman", "qazwsx"
+                "password",
+                "123456",
+                "12345678",
+                "qwerty",
+                "abc123",
+                "monkey",
+                "letmein",
+                "trustno1",
+                "dragon",
+                "baseball",
+                "iloveyou",
+                "master",
+                "sunshine",
+                "ashley",
+                "bailey",
+                "shadow",
+                "superman",
+                "qazwsx",
             ]
             if password.lower() in common_passwords:
                 score = 0

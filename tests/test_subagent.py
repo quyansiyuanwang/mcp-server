@@ -6,7 +6,7 @@ import os
 import sys
 from pathlib import Path
 from typing import Any, Callable, Dict
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
@@ -126,7 +126,7 @@ def test_openai_client_mock() -> None:
             messages = [{"role": "user", "content": "Hello"}]
             result = client.call("gpt-3.5-turbo", messages)
 
-            print(f"   Model: gpt-3.5-turbo")
+            print("   Model: gpt-3.5-turbo")
             print(f"   Response: {result['choices'][0]['message']['content']}")
             print(f"   Usage: {result['usage']}")
 
@@ -155,7 +155,7 @@ def test_anthropic_client_mock() -> None:
             messages = [{"role": "user", "content": "Hello"}]
             result = client.call("claude-3-haiku-20240307", messages)
 
-            print(f"   Model: claude-3-haiku-20240307")
+            print("   Model: claude-3-haiku-20240307")
             print(f"   Response: {result['choices'][0]['message']['content']}")
             print(f"   Usage: {result['usage']}")
 
@@ -465,7 +465,7 @@ def test_error_handling() -> None:
     # 测试无效的 API 密钥
     with patch.dict(os.environ, {}, clear=True):
         try:
-            client = OpenAIClient()
+            OpenAIClient()  # Should raise ValidationError
             assert False, "Should raise ValidationError"
         except Exception as e:
             print(f"   Missing API key error: {type(e).__name__}")

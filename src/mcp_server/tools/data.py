@@ -14,10 +14,10 @@ import json
 import csv
 import io
 import sys
-from typing import Any, Optional
+from typing import Any
 import xml.etree.ElementTree as ET
 
-from ..utils import logger, DataProcessingError, ValidationError
+from ..utils import logger
 
 # Import YAML support
 try:
@@ -92,9 +92,7 @@ def register_tools(mcp: Any) -> None:
         """
         try:
             data = json.loads(json_string)
-            return json.dumps(
-                data, indent=indent, sort_keys=sort_keys, ensure_ascii=False
-            )
+            return json.dumps(data, indent=indent, sort_keys=sort_keys, ensure_ascii=False)
         except json.JSONDecodeError as e:
             return f'{{"error": "Invalid JSON: {str(e)}"}}'
 
@@ -132,9 +130,7 @@ def register_tools(mcp: Any) -> None:
                 if current is None:
                     return f'{{"error": "Path not found: {path}"}}'
 
-            return json.dumps(
-                {"path": path, "value": current}, indent=2, ensure_ascii=False
-            )
+            return json.dumps({"path": path, "value": current}, indent=2, ensure_ascii=False)
 
         except json.JSONDecodeError as e:
             return f'{{"error": "Invalid JSON: {str(e)}"}}'
@@ -142,9 +138,7 @@ def register_tools(mcp: Any) -> None:
             return f'{{"error": "Query failed: {str(e)}"}}'
 
     @mcp.tool()
-    def csv_to_json(
-        csv_string: str, delimiter: str = ",", has_header: bool = True
-    ) -> str:
+    def csv_to_json(csv_string: str, delimiter: str = ",", has_header: bool = True) -> str:
         """
         Convert CSV data to JSON.
 
@@ -172,13 +166,9 @@ def register_tools(mcp: Any) -> None:
                         obj[header] = row[i] if i < len(row) else ""
                     data.append(obj)
             else:
-                data = [
-                    {"col_" + str(i): val for i, val in enumerate(row)} for row in rows
-                ]
+                data = [{"col_" + str(i): val for i, val in enumerate(row)} for row in rows]
 
-            return json.dumps(
-                {"data": data, "count": len(data)}, indent=2, ensure_ascii=False
-            )
+            return json.dumps({"data": data, "count": len(data)}, indent=2, ensure_ascii=False)
 
         except Exception as e:
             logger.error(f"CSV to JSON conversion failed: {e}")
@@ -332,9 +322,7 @@ def register_tools(mcp: Any) -> None:
                             items.append((new_key, v))
                 elif isinstance(obj, list):
                     for i, v in enumerate(obj):
-                        new_key = (
-                            f"{parent_key}{separator}{i}" if parent_key else str(i)
-                        )
+                        new_key = f"{parent_key}{separator}{i}" if parent_key else str(i)
                         if isinstance(v, (dict, list)):
                             items.extend(flatten(v, new_key).items())
                         else:
@@ -374,11 +362,7 @@ def register_tools(mcp: Any) -> None:
             def deep_merge(dict1, dict2):
                 result = dict1.copy()
                 for key, value in dict2.items():
-                    if (
-                        key in result
-                        and isinstance(result[key], dict)
-                        and isinstance(value, dict)
-                    ):
+                    if key in result and isinstance(result[key], dict) and isinstance(value, dict):
                         result[key] = deep_merge(result[key], value)
                     else:
                         result[key] = value
@@ -536,7 +520,9 @@ def register_tools(mcp: Any) -> None:
             JSON string representation of TOML data
         """
         if tomllib is None:
-            return json.dumps({"error": "TOML support not available. Install tomli or use Python 3.11+."})
+            return json.dumps(
+                {"error": "TOML support not available. Install tomli or use Python 3.11+."}
+            )
 
         try:
             data = tomllib.loads(toml_string)
@@ -558,7 +544,9 @@ def register_tools(mcp: Any) -> None:
             Formatted JSON string
         """
         if tomllib is None:
-            return json.dumps({"error": "TOML support not available. Install tomli or use Python 3.11+."})
+            return json.dumps(
+                {"error": "TOML support not available. Install tomli or use Python 3.11+."}
+            )
 
         try:
             data = tomllib.loads(toml_string)

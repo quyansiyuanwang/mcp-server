@@ -8,14 +8,18 @@ from typing import Any, Callable, Dict
 sys.path.insert(0, str(Path(__file__).parent))
 from mcp_server.tools import file
 
+
 class MockMCP:
     def __init__(self) -> None:
         self.tools: Dict[str, Callable[..., Any]] = {}
+
     def tool(self) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             self.tools[func.__name__] = func
             return func
+
         return decorator
+
 
 def test_file_diff_tools() -> None:
     print("=" * 60)
@@ -33,13 +37,13 @@ def test_file_diff_tools() -> None:
     file2.write_text("Line 1\nLine 2 modified\nLine 3\nLine 5\n")
 
     print("\n1. Testing diff_files:")
-    result = mcp.tools['diff_files'](str(file1), str(file2), 3, "unified")
+    result = mcp.tools["diff_files"](str(file1), str(file2), 3, "unified")
     print(f"   Result preview: {result[:200]}...")
 
     print("\n2. Testing diff_text:")
     text1 = "Hello World\nThis is a test\nLine 3"
     text2 = "Hello Universe\nThis is a test\nLine 3 modified"
-    result = mcp.tools['diff_text'](text1, text2, "unified")
+    result = mcp.tools["diff_text"](text1, text2, "unified")
     print(f"   Result preview: {result[:200]}...")
 
     # Cleanup
@@ -47,6 +51,7 @@ def test_file_diff_tools() -> None:
     file2.unlink()
 
     print("\n[OK] File comparison tools test completed")
+
 
 if __name__ == "__main__":
     test_file_diff_tools()

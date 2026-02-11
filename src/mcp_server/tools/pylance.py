@@ -5,13 +5,10 @@ Provides tools for Python type checking, code analysis, and diagnostics using Py
 """
 
 import json
-from pathlib import Path
 from typing import Any
 
 from ..command_executor import CommandExecutor
 from ..utils import (
-    CommandExecutionError,
-    ValidationError,
     logger,
     sanitize_path,
 )
@@ -64,20 +61,24 @@ def register_tools(mcp: Any) -> None:
             if output_json and result["stdout"]:
                 try:
                     diagnostics = json.loads(result["stdout"])
-                    return json.dumps({
-                        "success": result["success"],
-                        "file": str(path),
-                        "diagnostics": diagnostics,
-                    })
+                    return json.dumps(
+                        {
+                            "success": result["success"],
+                            "file": str(path),
+                            "diagnostics": diagnostics,
+                        }
+                    )
                 except json.JSONDecodeError:
                     pass
 
-            return json.dumps({
-                "success": result["success"],
-                "file": str(path),
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "file": str(path),
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"pylance_check_file failed: {e}")
@@ -118,20 +119,24 @@ def register_tools(mcp: Any) -> None:
             if result["stdout"]:
                 try:
                     diagnostics = json.loads(result["stdout"])
-                    return json.dumps({
-                        "success": result["success"],
-                        "project_path": str(path),
-                        "diagnostics": diagnostics,
-                    })
+                    return json.dumps(
+                        {
+                            "success": result["success"],
+                            "project_path": str(path),
+                            "diagnostics": diagnostics,
+                        }
+                    )
                 except json.JSONDecodeError:
                     pass
 
-            return json.dumps({
-                "success": result["success"],
-                "project_path": str(path),
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "project_path": str(path),
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"pylance_check_project failed: {e}")
@@ -166,21 +171,25 @@ def register_tools(mcp: Any) -> None:
             if result["stdout"]:
                 try:
                     diagnostics = json.loads(result["stdout"])
-                    return json.dumps({
-                        "success": result["success"],
-                        "file": str(path),
-                        "diagnostics": diagnostics,
-                        "verbose": verbose,
-                    })
+                    return json.dumps(
+                        {
+                            "success": result["success"],
+                            "file": str(path),
+                            "diagnostics": diagnostics,
+                            "verbose": verbose,
+                        }
+                    )
                 except json.JSONDecodeError:
                     pass
 
-            return json.dumps({
-                "success": result["success"],
-                "file": str(path),
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "file": str(path),
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"pylance_get_diagnostics failed: {e}")
@@ -196,11 +205,13 @@ def register_tools(mcp: Any) -> None:
         try:
             result = executor.execute("pyright", ["--version"], timeout=10)
 
-            return json.dumps({
-                "success": result["success"],
-                "version": result["stdout"].strip(),
-                "stderr": result["stderr"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "version": result["stdout"].strip(),
+                    "stderr": result["stderr"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"pylance_get_version failed: {e}")

@@ -10,14 +10,18 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from mcp_server.tools import python
 
+
 class MockMCP:
     def __init__(self) -> None:
         self.tools: Dict[str, Callable[..., Any]] = {}
+
     def tool(self) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             self.tools[func.__name__] = func
             return func
+
         return decorator
+
 
 def test_format_code() -> None:
     print("=" * 60)
@@ -37,17 +41,18 @@ def hello(  x,y  ):
     print(code)
 
     print("\nTesting black formatter...")
-    result = mcp.tools['python_format_code'](code, style="black")
+    result = mcp.tools["python_format_code"](code, style="black")
     data = json.loads(result)
 
-    if 'error' in data:
+    if "error" in data:
         print(f"   Error: {data['error']}")
-    elif 'warning' in data:
+    elif "warning" in data:
         print(f"   Warning: {data['warning']}")
-        print(f"   (black not installed, returned original code)")
+        print("   (black not installed, returned original code)")
     else:
-        print(f"   Formatted code:")
-        print(data.get('formatted_code', ''))
+        print("   Formatted code:")
+        print(data.get("formatted_code", ""))
+
 
 if __name__ == "__main__":
     test_format_code()

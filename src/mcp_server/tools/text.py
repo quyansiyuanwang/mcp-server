@@ -11,7 +11,7 @@ Provides tools for:
 
 import re
 import base64
-from typing import Any, Optional
+from typing import Any
 
 from ..utils import logger, extract_text_by_regex, truncate_text, ValidationError
 
@@ -70,9 +70,7 @@ def register_tools(mcp: Any) -> None:
 
                 # Average word length
                 avg_word_length = (
-                    sum(len(word) for word in words) / word_count
-                    if word_count > 0
-                    else 0
+                    sum(len(word) for word in words) / word_count if word_count > 0 else 0
                 )
 
                 # Paragraph count
@@ -85,9 +83,7 @@ def register_tools(mcp: Any) -> None:
                         "paragraph_count": paragraph_count,
                         "average_word_length": round(avg_word_length, 2),
                         "average_words_per_sentence": (
-                            round(word_count / sentence_count, 2)
-                            if sentence_count > 0
-                            else 0
+                            round(word_count / sentence_count, 2) if sentence_count > 0 else 0
                         ),
                     }
                 )
@@ -125,9 +121,7 @@ def register_tools(mcp: Any) -> None:
                     seen.add(email_lower)
                     unique_emails.append(email)
 
-            return json.dumps(
-                {"count": len(unique_emails), "emails": unique_emails}, indent=2
-            )
+            return json.dumps({"count": len(unique_emails), "emails": unique_emails}, indent=2)
 
         except Exception as e:
             logger.error(f"Email extraction failed: {e}")
@@ -159,9 +153,7 @@ def register_tools(mcp: Any) -> None:
                     seen.add(url)
                     unique_urls.append(url)
 
-            return json.dumps(
-                {"count": len(unique_urls), "urls": unique_urls}, indent=2
-            )
+            return json.dumps({"count": len(unique_urls), "urls": unique_urls}, indent=2)
 
         except Exception as e:
             logger.error(f"URL extraction failed: {e}")
@@ -212,9 +204,7 @@ def register_tools(mcp: Any) -> None:
             return f'{{"error": "Regex match failed: {str(e)}"}}'
 
     @mcp.tool()
-    def regex_replace(
-        text: str, pattern: str, replacement: str, flags: str = ""
-    ) -> str:
+    def regex_replace(text: str, pattern: str, replacement: str, flags: str = "") -> str:
         """
         Replace text matching a regular expression.
 
@@ -330,9 +320,7 @@ def register_tools(mcp: Any) -> None:
             return f"Error: Decoding failed: {str(e)}"
 
     @mcp.tool()
-    def calculate_text_similarity(
-        text1: str, text2: str, method: str = "levenshtein"
-    ) -> str:
+    def calculate_text_similarity(text1: str, text2: str, method: str = "levenshtein") -> str:
         """
         Calculate similarity between two text strings.
 
@@ -385,9 +373,7 @@ def register_tools(mcp: Any) -> None:
                 max_len = max(len(text1), len(text2))
                 similarity = 1 - (distance / max_len) if max_len > 0 else 1.0
 
-                logger.info(
-                    f"Levenshtein similarity: {similarity:.3f} (distance: {distance})"
-                )
+                logger.info(f"Levenshtein similarity: {similarity:.3f} (distance: {distance})")
 
                 return json.dumps(
                     {

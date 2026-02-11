@@ -82,7 +82,7 @@ class SearchCache:
             if len(self.cache) >= self.max_size:
                 oldest_key = min(self.cache.keys(), key=lambda k: self.cache[k]["created_at"])
                 del self.cache[oldest_key]
-                logger.info(f"Cache full, removed oldest entry")
+                logger.info("Cache full, removed oldest entry")
 
             self.cache[key] = {
                 "results": results,

@@ -23,10 +23,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install black ruff
 
-      - name: Check code formatting with Black
-        run: |
-          black --check src/ tests/
-
       - name: Lint with Ruff
         run: |
           ruff check src/ tests/
+
+      - name: Check code formatting with Black
+        run: |
+          black --check src/ tests/

@@ -10,8 +10,6 @@ from typing import Any
 
 from ..command_executor import CommandExecutor
 from ..utils import (
-    CommandExecutionError,
-    ValidationError,
     logger,
     sanitize_path,
 )
@@ -69,13 +67,15 @@ def register_tools(mcp: Any) -> None:
             # Execute uv command
             result = executor.execute("uv", args, timeout=120)
 
-            return json.dumps({
-                "success": result["success"],
-                "package": package_name,
-                "version": version or "latest",
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "package": package_name,
+                    "version": version or "latest",
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"uv_install_package failed: {e}")
@@ -98,12 +98,14 @@ def register_tools(mcp: Any) -> None:
                 timeout=60,
             )
 
-            return json.dumps({
-                "success": result["success"],
-                "package": package_name,
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "package": package_name,
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"uv_uninstall_package failed: {e}")
@@ -133,13 +135,15 @@ def register_tools(mcp: Any) -> None:
             # Get absolute path
             venv_path = sanitize_path(path)
 
-            return json.dumps({
-                "success": result["success"],
-                "venv_path": str(venv_path),
-                "python_version": python_version or "default",
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "venv_path": str(venv_path),
+                    "python_version": python_version or "default",
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"uv_create_venv failed: {e}")
@@ -157,9 +161,7 @@ def register_tools(mcp: Any) -> None:
         """
         try:
             if format not in ["json", "text"]:
-                return json.dumps({
-                    "error": f"Invalid format: {format}. Use 'json' or 'text'"
-                })
+                return json.dumps({"error": f"Invalid format: {format}. Use 'json' or 'text'"})
 
             # Build command arguments
             args = ["pip", "list"]
@@ -170,22 +172,28 @@ def register_tools(mcp: Any) -> None:
             result = executor.execute("uv", args, timeout=60)
 
             if not result["success"]:
-                return json.dumps({
-                    "error": "Failed to list packages",
-                    "stderr": result["stderr"],
-                })
+                return json.dumps(
+                    {
+                        "error": "Failed to list packages",
+                        "stderr": result["stderr"],
+                    }
+                )
 
             # Parse output
             if format == "json":
                 packages = json.loads(result["stdout"])
-                return json.dumps({
-                    "packages": packages,
-                    "count": len(packages),
-                })
+                return json.dumps(
+                    {
+                        "packages": packages,
+                        "count": len(packages),
+                    }
+                )
             else:
-                return json.dumps({
-                    "output": result["stdout"],
-                })
+                return json.dumps(
+                    {
+                        "output": result["stdout"],
+                    }
+                )
 
         except Exception as e:
             logger.error(f"uv_list_packages failed: {e}")
@@ -215,13 +223,15 @@ def register_tools(mcp: Any) -> None:
             # Get absolute path
             project_path = sanitize_path(path)
 
-            return json.dumps({
-                "success": result["success"],
-                "project_path": str(project_path),
-                "name": name or Path(path).name,
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "project_path": str(project_path),
+                    "name": name or Path(path).name,
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"uv_init_project failed: {e}")
@@ -246,12 +256,14 @@ def register_tools(mcp: Any) -> None:
                 timeout=180,
             )
 
-            return json.dumps({
-                "success": result["success"],
-                "project_path": project_path,
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "project_path": project_path,
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"uv_sync_dependencies failed: {e}")
@@ -276,12 +288,14 @@ def register_tools(mcp: Any) -> None:
                 timeout=180,
             )
 
-            return json.dumps({
-                "success": result["success"],
-                "project_path": project_path,
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "project_path": project_path,
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"uv_lock_dependencies failed: {e}")
@@ -308,13 +322,15 @@ def register_tools(mcp: Any) -> None:
             # Execute uv run command
             result = executor.execute("uv", uv_args, timeout=120)
 
-            return json.dumps({
-                "success": result["success"],
-                "command": command,
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-                "returncode": result["returncode"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "command": command,
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                    "returncode": result["returncode"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"uv_run_command failed: {e}")
@@ -330,11 +346,13 @@ def register_tools(mcp: Any) -> None:
         try:
             result = executor.execute("uv", ["--version"], timeout=10)
 
-            return json.dumps({
-                "success": result["success"],
-                "version": result["stdout"].strip(),
-                "stderr": result["stderr"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "version": result["stdout"].strip(),
+                    "stderr": result["stderr"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"uv_get_version failed: {e}")

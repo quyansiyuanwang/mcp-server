@@ -10,7 +10,6 @@ Provides secure command execution with:
 - Audit logging
 """
 
-import json
 import re
 import subprocess
 from pathlib import Path
@@ -23,7 +22,6 @@ from .utils import (
     SecurityError,
     COMMAND_TIMEOUT_DEFAULT,
     COMMAND_TIMEOUT_MAX,
-    COMMAND_OUTPUT_MAX_SIZE,
     logger,
     sanitize_command_output,
     validate_command_path,
@@ -140,6 +138,7 @@ class CommandExecutor:
             True if command exists, False otherwise
         """
         import shutil
+
         return shutil.which(command) is not None
 
     def _validate_working_directory(self, cwd: Optional[str]) -> Path:
@@ -239,9 +238,7 @@ class CommandExecutor:
             full_command = [command] + args
 
             # Log command execution (audit)
-            logger.info(
-                f"Executing command: {command} with {len(args)} args in {working_dir}"
-            )
+            logger.info(f"Executing command: {command} with {len(args)} args in {working_dir}")
             logger.debug(f"Full command: {' '.join(full_command)}")
 
             # Execute command with subprocess (shell=False for security)
@@ -263,9 +260,7 @@ class CommandExecutor:
 
             # Log result
             if result.returncode == 0:
-                logger.info(
-                    f"Command completed successfully in {execution_time:.2f}s"
-                )
+                logger.info(f"Command completed successfully in {execution_time:.2f}s")
             else:
                 logger.warning(
                     f"Command failed with code {result.returncode} in {execution_time:.2f}s"
@@ -283,9 +278,7 @@ class CommandExecutor:
         except subprocess.TimeoutExpired as e:
             execution_time = time.time() - start_time
             logger.error(f"Command timed out after {timeout}s")
-            raise CommandTimeoutError(
-                f"Command timed out after {timeout} seconds"
-            ) from e
+            raise CommandTimeoutError(f"Command timed out after {timeout} seconds") from e
 
         except (CommandValidationError, CommandExecutionError, SecurityError):
             raise

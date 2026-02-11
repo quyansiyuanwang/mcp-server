@@ -8,14 +8,11 @@ and module introspection.
 import ast
 import json
 import sys
-from pathlib import Path
 from typing import Any
 
 from ..command_executor import CommandExecutor
 from ..utils import (
-    CommandExecutionError,
     PYTHON_MAX_CODE_LENGTH,
-    ValidationError,
     logger,
 )
 
@@ -62,21 +59,23 @@ def register_tools(mcp: Any) -> None:
         try:
             # Validate code length
             if len(code) > PYTHON_MAX_CODE_LENGTH:
-                return json.dumps({
-                    "error": f"Code too long: {len(code)} bytes (max: {PYTHON_MAX_CODE_LENGTH})"
-                })
+                return json.dumps(
+                    {"error": f"Code too long: {len(code)} bytes (max: {PYTHON_MAX_CODE_LENGTH})"}
+                )
 
             # Safe mode: check for dangerous imports
             if safe_mode:
                 dangerous_modules = ["os", "subprocess", "sys", "shutil", "__import__"]
                 for module in dangerous_modules:
                     if f"import {module}" in code or f"from {module}" in code:
-                        return json.dumps({
-                            "error": f"Dangerous import blocked in safe mode: {module}"
-                        })
+                        return json.dumps(
+                            {"error": f"Dangerous import blocked in safe mode: {module}"}
+                        )
 
             # Create temporary file for code execution
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".py", delete=False, encoding="utf-8"
+            ) as f:
                 f.write(code)
                 temp_file = f.name
 
@@ -87,13 +86,15 @@ def register_tools(mcp: Any) -> None:
                 timeout=timeout,
             )
 
-            return json.dumps({
-                "success": result["success"],
-                "returncode": result["returncode"],
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-                "execution_time": result["execution_time"],
-            })
+            return json.dumps(
+                {
+                    "success": result["success"],
+                    "returncode": result["returncode"],
+                    "stdout": result["stdout"],
+                    "stderr": result["stderr"],
+                    "execution_time": result["execution_time"],
+                }
+            )
 
         except Exception as e:
             logger.error(f"python_execute_code failed: {e}")
@@ -121,19 +122,23 @@ def register_tools(mcp: Any) -> None:
             # Try to parse the code
             ast.parse(code, filename=filename)
 
-            return json.dumps({
-                "valid": True,
-                "message": "Syntax is valid",
-            })
+            return json.dumps(
+                {
+                    "valid": True,
+                    "message": "Syntax is valid",
+                }
+            )
 
         except SyntaxError as e:
-            return json.dumps({
-                "valid": False,
-                "error_message": str(e.msg),
-                "line_number": e.lineno,
-                "offset": e.offset,
-                "text": e.text,
-            })
+            return json.dumps(
+                {
+                    "valid": False,
+                    "error_message": str(e.msg),
+                    "line_number": e.lineno,
+                    "offset": e.offset,
+                    "text": e.text,
+                }
+            )
 
         except Exception as e:
             logger.error(f"python_validate_syntax failed: {e}")
@@ -158,44 +163,49 @@ def register_tools(mcp: Any) -> None:
             functions = []
             for node in ast.walk(tree):
                 if isinstance(node, ast.FunctionDef):
-                    functions.append({
-                        "name": node.name,
-                        "line": node.lineno,
-                        "args": [arg.arg for arg in node.args.args],
-                    })
+                    functions.append(
+                        {
+                            "name": node.name,
+                            "line": node.lineno,
+                            "args": [arg.arg for arg in node.args.args],
+                        }
+                    )
 
             # Extract classes
             classes = []
             for node in ast.walk(tree):
                 if isinstance(node, ast.ClassDef):
-                    methods = [
-                        n.name for n in node.body
-                        if isinstance(n, ast.FunctionDef)
-                    ]
-                    classes.append({
-                        "name": node.name,
-                        "line": node.lineno,
-                        "methods": methods,
-                    })
+                    methods = [n.name for n in node.body if isinstance(n, ast.FunctionDef)]
+                    classes.append(
+                        {
+                            "name": node.name,
+                            "line": node.lineno,
+                            "methods": methods,
+                        }
+                    )
 
             # Extract imports
             imports = []
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
                     for alias in node.names:
-                        imports.append({
-                            "type": "import",
-                            "module": alias.name,
-                            "alias": alias.asname,
-                        })
+                        imports.append(
+                            {
+                                "type": "import",
+                                "module": alias.name,
+                                "alias": alias.asname,
+                            }
+                        )
                 elif isinstance(node, ast.ImportFrom):
                     for alias in node.names:
-                        imports.append({
-                            "type": "from",
-                            "module": node.module,
-                            "name": alias.name,
-                            "alias": alias.asname,
-                        })
+                        imports.append(
+                            {
+                                "type": "from",
+                                "module": node.module,
+                                "name": alias.name,
+                                "alias": alias.asname,
+                            }
+                        )
 
             result = {
                 "functions": functions,
@@ -209,11 +219,13 @@ def register_tools(mcp: Any) -> None:
             return json.dumps(result)
 
         except SyntaxError as e:
-            return json.dumps({
-                "error": "Syntax error",
-                "message": str(e.msg),
-                "line": e.lineno,
-            })
+            return json.dumps(
+                {
+                    "error": "Syntax error",
+                    "message": str(e.msg),
+                    "line": e.lineno,
+                }
+            )
 
         except Exception as e:
             logger.error(f"python_parse_ast failed: {e}")
@@ -261,10 +273,12 @@ def register_tools(mcp: Any) -> None:
             return json.dumps(info)
 
         except ImportError as e:
-            return json.dumps({
-                "error": f"Module not found: {module_name}",
-                "message": str(e),
-            })
+            return json.dumps(
+                {
+                    "error": f"Module not found: {module_name}",
+                    "message": str(e),
+                }
+            )
 
         except Exception as e:
             logger.error(f"python_get_module_info failed: {e}")
@@ -289,10 +303,12 @@ def register_tools(mcp: Any) -> None:
             )
 
             if not result["success"]:
-                return json.dumps({
-                    "error": "Failed to list packages",
-                    "stderr": result["stderr"],
-                })
+                return json.dumps(
+                    {
+                        "error": "Failed to list packages",
+                        "stderr": result["stderr"],
+                    }
+                )
 
             # Parse JSON output
             packages = json.loads(result["stdout"])
@@ -300,15 +316,14 @@ def register_tools(mcp: Any) -> None:
             # Filter if pattern provided
             if filter_pattern:
                 pattern_lower = filter_pattern.lower()
-                packages = [
-                    pkg for pkg in packages
-                    if pattern_lower in pkg["name"].lower()
-                ]
+                packages = [pkg for pkg in packages if pattern_lower in pkg["name"].lower()]
 
-            return json.dumps({
-                "packages": packages,
-                "count": len(packages),
-            })
+            return json.dumps(
+                {
+                    "packages": packages,
+                    "count": len(packages),
+                }
+            )
 
         except Exception as e:
             logger.error(f"python_list_packages failed: {e}")
@@ -330,11 +345,36 @@ def register_tools(mcp: Any) -> None:
 
             # Standard library modules (common ones)
             stdlib_modules = {
-                "os", "sys", "re", "json", "time", "datetime", "pathlib",
-                "collections", "itertools", "functools", "typing", "subprocess",
-                "logging", "argparse", "unittest", "math", "random", "string",
-                "io", "shutil", "tempfile", "glob", "pickle", "csv", "xml",
-                "http", "urllib", "socket", "threading", "multiprocessing",
+                "os",
+                "sys",
+                "re",
+                "json",
+                "time",
+                "datetime",
+                "pathlib",
+                "collections",
+                "itertools",
+                "functools",
+                "typing",
+                "subprocess",
+                "logging",
+                "argparse",
+                "unittest",
+                "math",
+                "random",
+                "string",
+                "io",
+                "shutil",
+                "tempfile",
+                "glob",
+                "pickle",
+                "csv",
+                "xml",
+                "http",
+                "urllib",
+                "socket",
+                "threading",
+                "multiprocessing",
             }
 
             stdlib_imports = []
@@ -375,19 +415,23 @@ def register_tools(mcp: Any) -> None:
                         else:
                             third_party_imports.append(import_info)
 
-            return json.dumps({
-                "stdlib": stdlib_imports,
-                "third_party": third_party_imports,
-                "local": local_imports,
-                "total": len(stdlib_imports) + len(third_party_imports) + len(local_imports),
-            })
+            return json.dumps(
+                {
+                    "stdlib": stdlib_imports,
+                    "third_party": third_party_imports,
+                    "local": local_imports,
+                    "total": len(stdlib_imports) + len(third_party_imports) + len(local_imports),
+                }
+            )
 
         except SyntaxError as e:
-            return json.dumps({
-                "error": "Syntax error",
-                "message": str(e.msg),
-                "line": e.lineno,
-            })
+            return json.dumps(
+                {
+                    "error": "Syntax error",
+                    "message": str(e.msg),
+                    "line": e.lineno,
+                }
+            )
 
         except Exception as e:
             logger.error(f"python_analyze_imports failed: {e}")
@@ -406,9 +450,7 @@ def register_tools(mcp: Any) -> None:
         """
         try:
             if style not in ["black", "autopep8"]:
-                return json.dumps({
-                    "error": f"Invalid style: {style}. Use 'black' or 'autopep8'"
-                })
+                return json.dumps({"error": f"Invalid style: {style}. Use 'black' or 'autopep8'"})
 
             # Try to format using the specified tool
             if style == "black":
@@ -425,17 +467,21 @@ def register_tools(mcp: Any) -> None:
                 )
 
             if result["success"]:
-                return json.dumps({
-                    "formatted_code": result["stdout"],
-                    "style": style,
-                })
+                return json.dumps(
+                    {
+                        "formatted_code": result["stdout"],
+                        "style": style,
+                    }
+                )
             else:
                 # Formatter not installed, return original code with warning
-                return json.dumps({
-                    "formatted_code": code,
-                    "warning": f"{style} not installed. Install with: pip install {style}",
-                    "stderr": result["stderr"],
-                })
+                return json.dumps(
+                    {
+                        "formatted_code": code,
+                        "warning": f"{style} not installed. Install with: pip install {style}",
+                        "stderr": result["stderr"],
+                    }
+                )
 
         except Exception as e:
             logger.error(f"python_format_code failed: {e}")

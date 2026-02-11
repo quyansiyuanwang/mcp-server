@@ -10,14 +10,18 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from mcp_server.tools import uv, pylance
 
+
 class MockMCP:
     def __init__(self) -> None:
         self.tools: Dict[str, Callable[..., Any]] = {}
+
     def tool(self) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             self.tools[func.__name__] = func
             return func
+
         return decorator
+
 
 def test_uv_tools() -> None:
     print("=" * 60)
@@ -29,21 +33,22 @@ def test_uv_tools() -> None:
 
     # Test 1: uv_init_project
     print("\n1. Test uv_init_project:")
-    result = mcp.tools['uv_init_project']("./test_uv_project", "test-project")
+    result = mcp.tools["uv_init_project"]("./test_uv_project", "test-project")
     data = json.loads(result)
     print(f"   Success: {data.get('success')}")
-    if 'error' in data:
+    if "error" in data:
         print(f"   Error: {data['error']}")
     else:
         print(f"   Project: {data.get('project_path')}")
 
     # Test 2: uv_run_command
     print("\n2. Test uv_run_command:")
-    result = mcp.tools['uv_run_command']("python", ["--version"])
+    result = mcp.tools["uv_run_command"]("python", ["--version"])
     data = json.loads(result)
     print(f"   Success: {data.get('success')}")
-    if 'stdout' in data:
+    if "stdout" in data:
         print(f"   Output: {data['stdout'].strip()}")
+
 
 def test_pylance_tools() -> None:
     print("\n" + "=" * 60)
@@ -64,26 +69,27 @@ result = add(1, "2")  # Type error: should be int
 
     # Test 1: pylance_check_file
     print("\n1. Test pylance_check_file:")
-    result = mcp.tools['pylance_check_file'](str(test_file))
+    result = mcp.tools["pylance_check_file"](str(test_file))
     data = json.loads(result)
     print(f"   Success: {data.get('success')}")
-    if 'error' in data:
+    if "error" in data:
         print(f"   Error: {data['error']}")
-    elif 'diagnostics' in data:
-        print(f"   Found diagnostics")
+    elif "diagnostics" in data:
+        print("   Found diagnostics")
 
     # Test 2: pylance_get_version
     print("\n2. Test pylance_get_version:")
-    result = mcp.tools['pylance_get_version']()
+    result = mcp.tools["pylance_get_version"]()
     data = json.loads(result)
     print(f"   Success: {data.get('success')}")
-    if 'version' in data:
+    if "version" in data:
         print(f"   Version: {data['version']}")
-    if 'error' in data:
+    if "error" in data:
         print(f"   Error: {data['error']}")
 
     # Cleanup
     test_file.unlink(missing_ok=True)
+
 
 if __name__ == "__main__":
     test_uv_tools()

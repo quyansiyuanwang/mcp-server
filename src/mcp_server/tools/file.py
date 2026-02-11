@@ -9,11 +9,10 @@ Provides tools for:
 - File comparison and diff
 """
 
-import os
 import shutil
 import difflib
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 import glob
 
 from ..utils import (
@@ -69,9 +68,7 @@ def register_tools(mcp: Any) -> None:
             return f"Error: {str(e)}"
 
     @mcp.tool()
-    def write_file(
-        path: str, content: str, encoding: str = "utf-8", overwrite: bool = True
-    ) -> str:
+    def write_file(path: str, content: str, encoding: str = "utf-8", overwrite: bool = True) -> str:
         """
         Write content to a file.
 
@@ -123,9 +120,7 @@ def register_tools(mcp: Any) -> None:
             return f"Error: {str(e)}"
 
     @mcp.tool()
-    def list_directory(
-        path: str = ".", pattern: str = "*", recursive: bool = False
-    ) -> str:
+    def list_directory(path: str = ".", pattern: str = "*", recursive: bool = False) -> str:
         """
         List contents of a directory.
 
@@ -164,9 +159,7 @@ def register_tools(mcp: Any) -> None:
                     item_info = {
                         "name": item.name,
                         "path": str(item),
-                        "type": (
-                            "file" if is_file else "directory" if is_dir else "other"
-                        ),
+                        "type": ("file" if is_file else "directory" if is_dir else "other"),
                     }
 
                     if is_file:
@@ -214,9 +207,7 @@ def register_tools(mcp: Any) -> None:
             result = {"path": path, "exists": exists}
 
             if exists:
-                result["type"] = (
-                    "file" if p.is_file() else "directory" if p.is_dir() else "other"
-                )
+                result["type"] = "file" if p.is_file() else "directory" if p.is_dir() else "other"
 
             import json
 
@@ -248,9 +239,7 @@ def register_tools(mcp: Any) -> None:
                 "path": str(p),
                 "name": p.name,
                 "absolute_path": str(p.resolve()),
-                "type": (
-                    "file" if p.is_file() else "directory" if p.is_dir() else "other"
-                ),
+                "type": ("file" if p.is_file() else "directory" if p.is_dir() else "other"),
                 "size_bytes": stat.st_size,
                 "size": format_bytes(stat.st_size),
                 "created": format_timestamp(stat.st_ctime),
@@ -271,9 +260,7 @@ def register_tools(mcp: Any) -> None:
             return f'{{"error": "Failed to get file info: {str(e)}"}}'
 
     @mcp.tool()
-    def search_files(
-        directory: str = ".", pattern: str = "*", name_contains: str = ""
-    ) -> str:
+    def search_files(directory: str = ".", pattern: str = "*", name_contains: str = "") -> str:
         """
         Search for files in a directory.
 
@@ -431,9 +418,7 @@ def register_tools(mcp: Any) -> None:
             shutil.copy2(src, dst)
 
             file_size = safe_get_file_size(dst)
-            return (
-                f"File copied successfully to {destination} ({format_bytes(file_size)})"
-            )
+            return f"File copied successfully to {destination} ({format_bytes(file_size)})"
 
         except Exception as e:
             logger.error(f"Failed to copy file: {e}")
@@ -554,15 +539,11 @@ def register_tools(mcp: Any) -> None:
             # 生成差异
             if format == "unified":
                 diff = list(
-                    difflib.unified_diff(
-                        lines1, lines2, fromfile="text1", tofile="text2", n=3
-                    )
+                    difflib.unified_diff(lines1, lines2, fromfile="text1", tofile="text2", n=3)
                 )
             elif format == "context":
                 diff = list(
-                    difflib.context_diff(
-                        lines1, lines2, fromfile="text1", tofile="text2", n=3
-                    )
+                    difflib.context_diff(lines1, lines2, fromfile="text1", tofile="text2", n=3)
                 )
             else:  # ndiff
                 diff = list(difflib.ndiff(lines1, lines2))

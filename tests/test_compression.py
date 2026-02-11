@@ -2,21 +2,24 @@
 """Test configuration file tools"""
 
 import sys
-import json
 from pathlib import Path
 from typing import Any, Callable, Dict
 
 sys.path.insert(0, str(Path(__file__).parent))
 from mcp_server.tools import data
 
+
 class MockMCP:
     def __init__(self) -> None:
         self.tools: Dict[str, Callable[..., Any]] = {}
+
     def tool(self) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             self.tools[func.__name__] = func
             return func
+
         return decorator
+
 
 def test_config_tools() -> None:
     print("=" * 60)
@@ -39,18 +42,18 @@ settings:
 """
 
     print("\n1. Testing parse_yaml:")
-    result = mcp.tools['parse_yaml'](yaml_data)
+    result = mcp.tools["parse_yaml"](yaml_data)
     print(f"   Result: {result[:120]}...")
 
     print("\n2. Testing yaml_to_json:")
-    result = mcp.tools['yaml_to_json'](yaml_data, 2)
+    result = mcp.tools["yaml_to_json"](yaml_data, 2)
     print(f"   Result: {result[:120]}...")
 
     # Test JSON to YAML
     json_data = '{"name": "Test", "version": "1.0", "items": [1, 2, 3]}'
 
     print("\n3. Testing json_to_yaml:")
-    result = mcp.tools['json_to_yaml'](json_data)
+    result = mcp.tools["json_to_yaml"](json_data)
     print(f"   Result: {result[:100]}...")
 
     # Test TOML tools
@@ -69,14 +72,15 @@ port = 8080
 """
 
     print("\n4. Testing parse_toml:")
-    result = mcp.tools['parse_toml'](toml_data)
+    result = mcp.tools["parse_toml"](toml_data)
     print(f"   Result: {result[:120]}...")
 
     print("\n5. Testing toml_to_json:")
-    result = mcp.tools['toml_to_json'](toml_data, 2)
+    result = mcp.tools["toml_to_json"](toml_data, 2)
     print(f"   Result: {result[:120]}...")
 
     print("\n[OK] Configuration file tools test completed")
+
 
 if __name__ == "__main__":
     test_config_tools()

@@ -8,7 +8,6 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, Optional
-import base64
 
 from ..utils import logger
 

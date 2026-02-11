@@ -2,17 +2,18 @@
 """测试新增的MCP工具"""
 
 import sys
-import json
 from pathlib import Path
 from typing import Any, Callable, Dict
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent))
 
-from mcp_server.tools import compression, data, file, web, utility, text
+from mcp_server.tools import compression
+
 
 class MockMCP:
     """模拟MCP服务器用于测试"""
+
     def __init__(self) -> None:
         self.tools: Dict[str, Callable[..., Any]] = {}
 
@@ -20,7 +21,9 @@ class MockMCP:
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             self.tools[func.__name__] = func
             return func
+
         return decorator
+
 
 def test_compression_tools() -> None:
     """测试压缩工具"""
@@ -39,27 +42,27 @@ def test_compression_tools() -> None:
 
     # 1. 测试 compress_zip
     print("\n1. 测试 compress_zip:")
-    result = mcp.tools['compress_zip']([str(test_file1), str(test_file2)], "test.zip", 6)
+    result = mcp.tools["compress_zip"]([str(test_file1), str(test_file2)], "test.zip", 6)
     print(f"   结果: {result[:100]}...")
 
     # 2. 测试 list_archive_contents
     print("\n2. 测试 list_archive_contents:")
-    result = mcp.tools['list_archive_contents']("test.zip")
+    result = mcp.tools["list_archive_contents"]("test.zip")
     print(f"   结果: {result[:150]}...")
 
     # 3. 测试 extract_zip
     print("\n3. 测试 extract_zip:")
-    result = mcp.tools['extract_zip']("test.zip", "./extracted_zip")
+    result = mcp.tools["extract_zip"]("test.zip", "./extracted_zip")
     print(f"   结果: {result[:150]}...")
 
     # 4. 测试 compress_tar
     print("\n4. 测试 compress_tar:")
-    result = mcp.tools['compress_tar']([str(test_file1), str(test_file2)], "test.tar.gz", "gz")
+    result = mcp.tools["compress_tar"]([str(test_file1), str(test_file2)], "test.tar.gz", "gz")
     print(f"   结果: {result[:100]}...")
 
     # 5. 测试 extract_tar
     print("\n5. 测试 extract_tar:")
-    result = mcp.tools['extract_tar']("test.tar.gz", "./extracted_tar")
+    result = mcp.tools["extract_tar"]("test.tar.gz", "./extracted_tar")
     print(f"   结果: {result[:150]}...")
 
     # 清理测试文件
@@ -69,6 +72,7 @@ def test_compression_tools() -> None:
     Path("test.tar.gz").unlink(missing_ok=True)
 
     print("\n✅ 压缩工具测试完成")
+
 
 if __name__ == "__main__":
     test_compression_tools()

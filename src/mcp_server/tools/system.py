@@ -13,7 +13,7 @@ import os
 import sys
 import platform
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 import psutil
 

@@ -8,14 +8,18 @@ from typing import Any, Callable, Dict
 sys.path.insert(0, str(Path(__file__).parent))
 from mcp_server.tools import web
 
+
 class MockMCP:
     def __init__(self) -> None:
         self.tools: Dict[str, Callable[..., Any]] = {}
+
     def tool(self) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             self.tools[func.__name__] = func
             return func
+
         return decorator
+
 
 def test_network_tools() -> None:
     print("=" * 60)
@@ -26,24 +30,19 @@ def test_network_tools() -> None:
     web.register_tools(mcp)
 
     print("\n1. Testing http_request (GET):")
-    result = mcp.tools['http_request'](
-        "https://httpbin.org/get",
-        "GET",
-        '{}',
-        None,
-        10
-    )
+    result = mcp.tools["http_request"]("https://httpbin.org/get", "GET", "{}", None, 10)
     print(f"   Result preview: {result[:150]}...")
 
     print("\n2. Testing get_network_info:")
-    result = mcp.tools['get_network_info']()
+    result = mcp.tools["get_network_info"]()
     print(f"   Result preview: {result[:200]}...")
 
     print("\n3. Testing dns_lookup:")
-    result = mcp.tools['dns_lookup']("google.com", "A")
+    result = mcp.tools["dns_lookup"]("google.com", "A")
     print(f"   Result preview: {result[:150]}...")
 
     print("\n[OK] Network tools test completed")
+
 
 if __name__ == "__main__":
     test_network_tools()
