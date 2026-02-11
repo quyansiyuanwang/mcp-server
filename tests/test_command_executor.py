@@ -22,7 +22,7 @@ def test_security_tools():
     print("=" * 60)
 
     mcp = MockMCP()
-    utility_tools.register_tools(mcp)
+    utility.register_tools(mcp)
 
     print("\n1. Testing generate_password:")
     result = mcp.tools['generate_password'](16, True, True, True)

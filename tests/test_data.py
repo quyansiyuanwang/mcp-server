@@ -24,7 +24,7 @@ def test_uv_tools():
     print("=" * 60)
 
     mcp = MockMCP()
-    uv_tools.register_tools(mcp)
+    uv.register_tools(mcp)
 
     # Test 1: uv_init_project
     print("\n1. Test uv_init_project:")
@@ -50,7 +50,7 @@ def test_pylance_tools():
     print("=" * 60)
 
     mcp = MockMCP()
-    pylance_tools.register_tools(mcp)
+    pylance.register_tools(mcp)
 
     # Create a test Python file
     test_file = Path("test_type_check.py")

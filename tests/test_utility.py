@@ -28,7 +28,7 @@ def test_compression_tools():
     print("=" * 60)
 
     mcp = MockMCP()
-    compression_tools.register_tools(mcp)
+    compression.register_tools(mcp)
 
     # 创建测试文件
     test_file1 = Path("test1.txt")

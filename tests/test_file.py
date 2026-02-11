@@ -22,7 +22,7 @@ def test_file_diff_tools():
     print("=" * 60)
 
     mcp = MockMCP()
-    file_tools.register_tools(mcp)
+    file.register_tools(mcp)
 
     # Create test files
     file1 = Path("test_old.txt")

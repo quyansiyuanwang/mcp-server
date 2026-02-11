@@ -22,7 +22,7 @@ def test_text_similarity():
     print("=" * 60)
 
     mcp = MockMCP()
-    text_tools.register_tools(mcp)
+    text.register_tools(mcp)
 
     print("\n1. Testing calculate_text_similarity (Levenshtein):")
     text1 = "Hello World"

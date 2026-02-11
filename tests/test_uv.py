@@ -24,7 +24,7 @@ def test_format_code():
     print("=" * 60)
 
     mcp = MockMCP()
-    python_tools.register_tools(mcp)
+    python.register_tools(mcp)
 
     # Test with unformatted code
     code = """

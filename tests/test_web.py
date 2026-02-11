@@ -22,7 +22,7 @@ def test_network_tools():
     print("=" * 60)
 
     mcp = MockMCP()
-    web_tools.register_tools(mcp)
+    web.register_tools(mcp)
 
     print("\n1. Testing http_request (GET):")
     result = mcp.tools['http_request'](

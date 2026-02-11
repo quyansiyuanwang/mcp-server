@@ -59,7 +59,7 @@ def test_compression_tools(config):
     print("=" * 60)
 
     mcp = MockMCP()
-    compression_tools.register_tools(mcp)
+    compression.register_tools(mcp)
 
     # Create test files with random content
     test_files = []
@@ -97,7 +97,7 @@ def test_config_tools(config):
     print("=" * 60)
 
     mcp = MockMCP()
-    data_tools.register_tools(mcp)
+    data.register_tools(mcp)
 
     # Generate dynamic YAML content
     yaml_content = f"""
@@ -138,7 +138,7 @@ def test_file_diff_tools(config):
     print("=" * 60)
 
     mcp = MockMCP()
-    file_tools.register_tools(mcp)
+    file.register_tools(mcp)
 
     # Create two files with slight differences
     base_text = config.generate_random_text(50)
@@ -169,7 +169,7 @@ def test_security_tools(config):
     print("=" * 60)
 
     mcp = MockMCP()
-    utility_tools.register_tools(mcp)
+    utility.register_tools(mcp)
 
     # Test with random password length
     password_length = random.randint(12, 24)
@@ -194,7 +194,7 @@ def test_text_similarity(config):
     print("=" * 60)
 
     mcp = MockMCP()
-    text_tools.register_tools(mcp)
+    text.register_tools(mcp)
 
     # Generate similar texts
     base_text = config.generate_random_text(30)

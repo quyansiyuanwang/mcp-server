@@ -23,7 +23,7 @@ def test_config_tools():
     print("=" * 60)
 
     mcp = MockMCP()
-    data_tools.register_tools(mcp)
+    data.register_tools(mcp)
 
     # Test YAML tools
     yaml_data = """

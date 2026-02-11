@@ -27,7 +27,7 @@ def test_python_execute_code():
     print("=" * 60)
 
     mcp = MockMCP()
-    python_tools.register_tools(mcp)
+    python.register_tools(mcp)
 
     # Test 1: Simple print statement
     print("\n1. Test simple print:")

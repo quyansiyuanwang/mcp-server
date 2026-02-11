@@ -81,9 +81,9 @@ def test_get_server_version():
         print(f"  {i}. {feature}")
 
     # 验证数据
-    assert data['total_tools'] == 74, f"工具总数应为 74,实际为 {data['total_tools']}"
-    assert data['total_categories'] == 7, f"类别总数应为 7,实际为 {data['total_categories']}"
-    assert len(data['features']) == 7, f"特性数量应为 7,实际为 {len(data['features'])}"
+    assert data['total_tools'] == 95, f"工具总数应为 95,实际为 {data['total_tools']}"
+    assert data['total_categories'] == 10, f"类别总数应为 10,实际为 {data['total_categories']}"
+    assert len(data['features']) == 10, f"特性数量应为 10,实际为 {len(data['features'])}"
 
     print("\nget_server_version() 验证通过!")
 
