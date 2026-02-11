@@ -10,8 +10,7 @@ Provides tools for:
 import json
 import zipfile
 import tarfile
-from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from mcp_server.utils import (
     logger,
@@ -21,7 +20,6 @@ from mcp_server.utils import (
     safe_get_file_size,
     format_bytes,
     validate_archive_safety,
-    MAX_EXTRACT_SIZE,
 )
 
 # Module metadata
@@ -36,13 +34,11 @@ TOOLS = [
 ]
 
 
-def register_tools(mcp):
+def register_tools(mcp: Any) -> None:
     """Register compression tools."""
 
     @mcp.tool()
-    def compress_zip(
-        files: List[str], output_path: str, compression_level: int = 6
-    ) -> str:
+    def compress_zip(files: List[str], output_path: str, compression_level: int = 6) -> str:
         """
         Create a ZIP archive from files.
 
@@ -89,9 +85,7 @@ def register_tools(mcp):
 
             # 计算压缩率
             compressed_size = safe_get_file_size(output)
-            ratio = (
-                (1 - compressed_size / total_size) * 100 if total_size > 0 else 0
-            )
+            ratio = (1 - compressed_size / total_size) * 100 if total_size > 0 else 0
 
             logger.info(
                 f"Created ZIP archive: {output} ({len(validated_files)} files, "
@@ -117,9 +111,7 @@ def register_tools(mcp):
             return json.dumps({"error": str(e), "type": "unknown"})
 
     @mcp.tool()
-    def extract_zip(
-        zip_path: str, extract_to: str = ".", password: str = None
-    ) -> str:
+    def extract_zip(zip_path: str, extract_to: str = ".", password: str = None) -> str:
         """
         Extract a ZIP archive.
 
@@ -195,17 +187,13 @@ def register_tools(mcp):
         except RuntimeError as e:
             # 密码错误或加密问题
             logger.error(f"ZIP extraction error: {e}")
-            return json.dumps(
-                {"error": f"Extraction failed (check password): {e}", "type": "file"}
-            )
+            return json.dumps({"error": f"Extraction failed (check password): {e}", "type": "file"})
         except Exception as e:
             logger.error(f"Unexpected error in extract_zip: {e}")
             return json.dumps({"error": str(e), "type": "unknown"})
 
     @mcp.tool()
-    def compress_tar(
-        files: List[str], output_path: str, compression: str = "gz"
-    ) -> str:
+    def compress_tar(files: List[str], output_path: str, compression: str = "gz") -> str:
         """
         Create a TAR archive from files.
 
@@ -254,9 +242,7 @@ def register_tools(mcp):
 
             # 计算压缩率
             compressed_size = safe_get_file_size(output)
-            ratio = (
-                (1 - compressed_size / total_size) * 100 if total_size > 0 else 0
-            )
+            ratio = (1 - compressed_size / total_size) * 100 if total_size > 0 else 0
 
             logger.info(
                 f"Created TAR archive: {output} ({len(validated_files)} files, "
@@ -386,9 +372,7 @@ def register_tools(mcp):
                                 {
                                     "name": info.filename,
                                     "size": format_bytes(info.file_size),
-                                    "compressed_size": format_bytes(
-                                        info.compress_size
-                                    ),
+                                    "compressed_size": format_bytes(info.compress_size),
                                     "modified": info.date_time,
                                 }
                             )
@@ -415,13 +399,9 @@ def register_tools(mcp):
                     "Supported: .zip, .tar, .gz, .bz2, .tgz, .tbz2"
                 )
 
-            compression_ratio = (
-                (1 - total_compressed / total_size) * 100 if total_size > 0 else 0
-            )
+            compression_ratio = (1 - total_compressed / total_size) * 100 if total_size > 0 else 0
 
-            logger.info(
-                f"Listed archive contents: {archive_file} ({len(files_info)} files)"
-            )
+            logger.info(f"Listed archive contents: {archive_file} ({len(files_info)} files)")
 
             return json.dumps(
                 {

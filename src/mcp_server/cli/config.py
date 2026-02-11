@@ -10,10 +10,11 @@ import os
 import sys
 from pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from typing import Any, Optional
 import argparse
 
 
-def get_python_executable():
+def get_python_executable() -> str:
     """Get the Python executable path for the current environment."""
     if hasattr(sys, "real_prefix") or (
         hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix
@@ -23,14 +24,16 @@ def get_python_executable():
     return sys.executable
 
 
-def get_server_path():
+def get_server_path() -> str:
     """Get the path to main.py."""
     return str(Path(__file__).parent / "main.py")
 
 
 def generate_mcp_config(
-    server_name="comprehensive-mcp", python_path=None, server_path=None
-):
+    server_name: str = "comprehensive-mcp",
+    python_path: Optional[str] = None,
+    server_path: Optional[str] = None
+) -> dict[str, Any]:
     """
     Generate MCP configuration for Claude Desktop and other clients.
 
@@ -62,14 +65,14 @@ def generate_mcp_config(
     return config
 
 
-def save_config(config, output_path="mcp_config.json"):
+def save_config(config: dict[str, Any], output_path: str = "mcp_config.json") -> str:
     """Save configuration to file."""
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2, ensure_ascii=False)
     return output_path
 
 
-def get_claude_config_path():
+def get_claude_config_path() -> Optional[Path]:
     """Get the Claude Desktop configuration path."""
     if sys.platform == "win32":
         # Windows
@@ -94,7 +97,7 @@ def get_claude_config_path():
     return None
 
 
-def merge_with_existing_config(new_config, existing_config_path):
+def merge_with_existing_config(new_config: dict[str, Any], existing_config_path: Path) -> dict[str, Any]:
     """Merge new MCP server config with existing configuration."""
     try:
         if existing_config_path.exists():
@@ -117,7 +120,7 @@ def merge_with_existing_config(new_config, existing_config_path):
 class ConfigHTTPHandler(BaseHTTPRequestHandler):
     """HTTP handler for serving MCP configuration."""
 
-    def do_GET(self):
+    def do_GET(self) -> None:
         """Handle GET requests."""
         if self.path == "/config" or self.path == "/":
             config = generate_mcp_config()
@@ -160,12 +163,12 @@ class ConfigHTTPHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"Not Found")
 
-    def log_message(self, format, *args):
+    def log_message(self, format: str, *args: Any) -> None:
         """Custom log message format."""
         print(f"[{self.log_date_time_string()}] {format % args}")
 
 
-def run_http_server(port=8765):
+def run_http_server(port: int = 8765) -> None:
     """Run HTTP server to provide configuration."""
     server_address = ("", port)
     httpd = HTTPServer(server_address, ConfigHTTPHandler)
@@ -187,7 +190,7 @@ def run_http_server(port=8765):
         httpd.shutdown()
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Generate MCP server configuration for Claude Desktop and other clients"

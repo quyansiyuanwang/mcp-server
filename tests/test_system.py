@@ -4,9 +4,10 @@
 """
 
 import json
+from typing import Any, Dict
 from mcp_server.main import get_all_tools_info, get_version_info, TOOL_MODULES
 
-def test_tool_modules_metadata():
+def test_tool_modules_metadata() -> None:
     """测试所有模块是否都有正确的元数据"""
     print("=" * 60)
     print("测试模块元数据")
@@ -35,7 +36,7 @@ def test_tool_modules_metadata():
 
     print("\n所有模块元数据验证通过!")
 
-def test_list_all_tools():
+def test_list_all_tools() -> None:
     """测试 get_all_tools_info() 函数"""
     print("\n" + "=" * 60)
     print("测试 get_all_tools_info() 函数")
@@ -61,7 +62,7 @@ def test_list_all_tools():
 
     print("\nlist_all_tools() 验证通过!")
 
-def test_get_server_version():
+def test_get_server_version() -> None:
     """测试 get_version_info() 函数"""
     print("\n" + "=" * 60)
     print("测试 get_version_info() 函数")

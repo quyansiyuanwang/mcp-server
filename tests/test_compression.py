@@ -4,20 +4,21 @@
 import sys
 import json
 from pathlib import Path
+from typing import Any, Callable, Dict
 
 sys.path.insert(0, str(Path(__file__).parent))
 from mcp_server.tools import data
 
 class MockMCP:
-    def __init__(self):
-        self.tools = {}
-    def tool(self):
-        def decorator(func):
+    def __init__(self) -> None:
+        self.tools: Dict[str, Callable[..., Any]] = {}
+    def tool(self) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             self.tools[func.__name__] = func
             return func
         return decorator
 
-def test_config_tools():
+def test_config_tools() -> None:
     print("=" * 60)
     print("Testing Configuration File Tools (5 tools)")
     print("=" * 60)

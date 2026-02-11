@@ -11,7 +11,7 @@ Provides tools for:
 
 import re
 import base64
-from typing import Optional
+from typing import Any, Optional
 
 from ..utils import logger, extract_text_by_regex, truncate_text, ValidationError
 
@@ -31,7 +31,7 @@ TOOLS = [
 ]
 
 
-def register_tools(mcp):
+def register_tools(mcp: Any) -> None:
     """Register all text processing tools with the MCP server."""
 
     @mcp.tool()

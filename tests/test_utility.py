@@ -4,6 +4,7 @@
 import sys
 import json
 from pathlib import Path
+from typing import Any, Callable, Dict
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent))
@@ -12,16 +13,16 @@ from mcp_server.tools import compression, data, file, web, utility, text
 
 class MockMCP:
     """模拟MCP服务器用于测试"""
-    def __init__(self):
-        self.tools = {}
+    def __init__(self) -> None:
+        self.tools: Dict[str, Callable[..., Any]] = {}
 
-    def tool(self):
-        def decorator(func):
+    def tool(self) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             self.tools[func.__name__] = func
             return func
         return decorator
 
-def test_compression_tools():
+def test_compression_tools() -> None:
     """测试压缩工具"""
     print("=" * 60)
     print("测试压缩工具 (5个)")

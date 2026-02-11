@@ -13,7 +13,7 @@ import os
 import shutil
 import difflib
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 import glob
 
 from ..utils import (
@@ -47,7 +47,7 @@ TOOLS = [
 ]
 
 
-def register_tools(mcp):
+def register_tools(mcp: Any) -> None:
     """Register all file system tools with the MCP server."""
 
     @mcp.tool()

@@ -6,6 +6,7 @@ Provides tools for fast Python package and project management using uv.
 
 import json
 from pathlib import Path
+from typing import Any
 
 from ..command_executor import CommandExecutor
 from ..utils import (
@@ -31,7 +32,7 @@ TOOLS = [
 ]
 
 
-def register_tools(mcp):
+def register_tools(mcp: Any) -> None:
     """Register all UV package manager tools."""
 
     executor = CommandExecutor()

@@ -1,6 +1,6 @@
 # Comprehensive MCP Server
 
-A powerful Model Context Protocol (MCP) server with **95+ practical tools** across 10 categories, built using [FastMCP](https://github.com/jlowin/fastmcp).
+A powerful Model Context Protocol (MCP) server with **98+ practical tools** across 11 categories, built using [FastMCP](https://github.com/jlowin/fastmcp).
 
 ## 🚀 Features
 
@@ -16,6 +16,7 @@ This comprehensive MCP server provides tools for:
 - **🐍 Python Development** (8 tools): Code execution, syntax validation, AST analysis, module introspection
 - **📦 UV Package Manager** (9 tools): Fast package management, virtual environments, dependency management
 - **🔍 Pylance/Pyright** (4 tools): Type checking, code analysis, diagnostics
+- **🤖 Subagent AI** (6 tools): Delegate subtasks to external AI models (OpenAI/Anthropic/ZhipuAI), parallel execution, conditional branching, persistent config
 
 ### ⚡ Quick Configuration
 
@@ -139,7 +140,7 @@ Use `python generate_config.py --show-config` to get the exact paths for your sy
 python main.py
 ```
 
-The server will start and register all 74+ tools, ready to accept MCP connections.
+The server will start and register all 77+ tools, ready to accept MCP connections.
 
 ### Server Logs
 
@@ -857,6 +858,98 @@ check_password_strength(password="MyP@ssw0rd123")
 
 ---
 
+### 🤖 Subagent AI Orchestration (6 tools)
+
+**New!** Delegate subtasks to external AI models with parallel execution and cost tracking.
+
+**Setup Options:**
+
+**Option 1: Persistent Config (Recommended)**
+```python
+# Set once, use forever
+subagent_config_set("openai", "sk-proj-xxxxxxxx")
+subagent_config_set("zhipuai", "your-api-key.xxxx")
+
+# List all configured providers
+subagent_config_list()
+```
+
+**Option 2: Environment Variables**
+```bash
+export OPENAI_API_KEY="sk-..."
+export ANTHROPIC_API_KEY="sk-ant-..."
+export ZHIPUAI_API_KEY="your-api-key.xxxx"  # 智谱AI
+
+# Optional: Custom endpoints
+export OPENAI_API_BASE="https://custom-endpoint.com/v1"
+export ANTHROPIC_API_BASE="https://custom-endpoint.com/v1"
+export ZHIPUAI_API_BASE="https://open.bigmodel.cn/api/paas/v4"
+```
+
+#### `subagent_call`
+
+Call an external AI model to handle a subtask.
+
+```python
+subagent_call(
+    provider="openai",  # or "anthropic", "zhipuai"
+    model="gpt-4",
+    messages='[{"role": "user", "content": "Explain quantum computing"}]',
+    max_tokens=500,
+    temperature=0.7
+)
+# Returns: JSON with result, token usage, cost, and status
+# Supported models: GPT-3.5/4, Claude-3 series, GLM-4 series
+# Features: Auto-retry, cost tracking, token counting
+```
+
+#### `subagent_parallel`
+
+Execute multiple AI subtasks in parallel with result aggregation.
+
+```python
+subagent_parallel(
+    tasks='[
+        {"name": "task1", "provider": "openai", "model": "gpt-3.5-turbo", "messages": [...]},
+        {"name": "task2", "provider": "anthropic", "model": "claude-3-haiku", "messages": [...]}
+    ]',
+    max_workers=3
+)
+# Returns: JSON with all results and summary (total cost, tokens, timing)
+# Use case: Document analysis, multi-aspect evaluation, parallel translations
+```
+
+#### `subagent_conditional`
+
+Execute conditional branching based on AI decision.
+
+```python
+subagent_conditional(
+    condition_task='{"provider": "openai", "model": "gpt-3.5-turbo", "messages": [...]}',
+    true_task='{"provider": "openai", "model": "gpt-4", "messages": [...]}',
+    false_task='{"provider": "openai", "model": "gpt-3.5-turbo", "messages": [...]}'
+)
+# Returns: JSON with condition result, branch taken, final result, and total cost
+# Use case: Smart routing, adaptive processing, cost optimization
+```
+
+**Configuration Tools:**
+
+- `subagent_config_set(provider, api_key, api_base=None)` - Save API credentials permanently
+- `subagent_config_get(provider)` - Query current configuration (masked)
+- `subagent_config_list()` - List all configured providers
+
+**📖 Full Documentation:**
+- [docs/SUBAGENT_GUIDE.md](docs/SUBAGENT_GUIDE.md) - Complete usage guide with examples
+- [docs/SUBAGENT_CONFIG.md](docs/SUBAGENT_CONFIG.md) - Configuration management guide
+- [docs/ZHIPUAI_GUIDE.md](docs/ZHIPUAI_GUIDE.md) - ZhipuAI integration guide
+
+**💡 Examples:**
+- [examples/subagent_usage_example.py](examples/subagent_usage_example.py) - AI orchestration examples
+- [examples/subagent_config_example.py](examples/subagent_config_example.py) - Configuration management examples
+
+---
+
 ## 📖 Resources
 
 ### `config://tools`
@@ -1019,7 +1112,7 @@ python generate_config.py --http-server --port 8765
 python main.py
 ```
 
-The server provides 74+ tools across 7 categories! Check the logs for startup confirmation.
+The server provides 77+ tools across 7 categories! Check the logs for startup confirmation.
 
 ---
 

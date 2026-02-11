@@ -14,7 +14,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from .utils import (
     CommandExecutionError,
@@ -125,7 +125,7 @@ class CommandValidator:
 class CommandExecutor:
     """Executes commands securely with validation and resource limits."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the command executor."""
         self.validator = CommandValidator()
 
@@ -183,7 +183,7 @@ class CommandExecutor:
         args: list[str],
         cwd: Optional[str] = None,
         timeout: int = COMMAND_TIMEOUT_DEFAULT,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         Execute a command securely.
 

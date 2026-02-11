@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-02-11
+
+### Added
+
+- **Persistent Configuration Management**: New configuration system for API credentials
+  - `SubagentConfig` class for persistent credential storage (~/.subagent_config.json)
+  - Three new MCP tools: `subagent_config_set`, `subagent_config_get`, `subagent_config_list`
+  - Automatic file permissions (600) for config file on Unix/Linux/macOS
+  - Configuration priority: Environment Variables > Config File > Defaults
+  - Sensitive data masking in all output
+  - Support for custom config file paths
+  - Per-project configuration support
+
+### Changed
+
+- Updated Subagent tools from 3 to 6 total tools
+- Enhanced all AI client classes (OpenAI, Anthropic, ZhipuAI) to use config manager
+- Updated SUBAGENT_GUIDE.md with persistent configuration examples
+- Updated README.md tool count from 74+ to 77+ tools
+
+### Documentation
+
+- New guide: `docs/SUBAGENT_CONFIG.md` - Complete configuration management guide
+- New example: `examples/subagent_config_example.py` - 8 configuration examples
+- Updated existing guides with configuration management information
+
 ## [0.1.0] - 2026-02-11
 
 ### Added

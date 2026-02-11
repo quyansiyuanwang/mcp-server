@@ -8,6 +8,7 @@ Author: MCP Server Project
 Version: 0.1.0
 """
 
+from typing import Any
 from fastmcp import FastMCP
 
 # Import all tool modules
@@ -22,6 +23,7 @@ from mcp_server.tools import (
     python,
     uv,
     pylance,
+    subagent,
 )
 from mcp_server.utils import logger
 
@@ -67,6 +69,10 @@ TOOL_MODULES = [
         "module": pylance,
         "category_key": "pylance_pyright",
     },
+    {
+        "module": subagent,
+        "category_key": "subagent_ai",
+    },
 ]
 
 # Create the comprehensive MCP server
@@ -84,11 +90,11 @@ for module_info in TOOL_MODULES:
     tool_count = len(getattr(module, "TOOLS", []))
 
     logger.info(f"Registering {category_name} tools ({tool_count} tools)...")
-    module.register_tools(mcp)
+    module.register_tools(mcp)  # type: ignore[attr-defined]
 
 
 # Helper functions for resources
-def get_all_tools_info() -> dict:
+def get_all_tools_info() -> dict[str, Any]:
     """Get all tools information as a dictionary."""
     # Build categories dynamically from module metadata
     categories = {}
@@ -128,10 +134,11 @@ def get_all_tools_info() -> dict:
 def list_all_tools() -> str:
     """List all available tools organized by category."""
     import json
+
     return json.dumps(get_all_tools_info(), indent=2)
 
 
-def get_version_info() -> dict:
+def get_version_info() -> dict[str, Any]:
     """Get server version information as a dictionary."""
     # Calculate total tools dynamically
     total_tools = sum(len(getattr(m["module"], "TOOLS", [])) for m in TOOL_MODULES)
@@ -159,6 +166,7 @@ def get_version_info() -> dict:
 def get_server_version() -> str:
     """Get server version and information."""
     import json
+
     return json.dumps(get_version_info(), indent=2)
 
 
@@ -168,7 +176,7 @@ logger.info("Server ready to accept connections.")
 logger.info("=" * 60)
 
 
-def main():
+def main() -> None:
     """Main entry point for the MCP server."""
     mcp.run()
 

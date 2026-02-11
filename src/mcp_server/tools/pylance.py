@@ -6,6 +6,7 @@ Provides tools for Python type checking, code analysis, and diagnostics using Py
 
 import json
 from pathlib import Path
+from typing import Any
 
 from ..command_executor import CommandExecutor
 from ..utils import (
@@ -26,7 +27,7 @@ TOOLS = [
 ]
 
 
-def register_tools(mcp):
+def register_tools(mcp: Any) -> None:
     """Register all Pylance/Pyright tools."""
 
     executor = CommandExecutor()

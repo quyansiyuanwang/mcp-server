@@ -56,7 +56,7 @@ TOOLS = [
 ]
 
 
-def register_tools(mcp):
+def register_tools(mcp: Any) -> None:
     """Register all data processing tools with the MCP server."""
 
     @mcp.tool()

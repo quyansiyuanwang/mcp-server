@@ -2,15 +2,16 @@
 Web and network tools for the MCP server.
 
 Provides tools for:
-- Web search (DuckDuckGo with fallback)
+- Multi-engine web search (DuckDuckGo, Bing, Google, Baidu)
+- Advanced search with caching and rate limiting
 - Webpage fetching and parsing
 - URL validation and parsing
 - HTTP operations
 - Link extraction
 """
 
-import re
-from typing import Optional
+import json
+from typing import Any
 from urllib.parse import urlparse, urljoin
 
 import requests
@@ -22,16 +23,19 @@ from ..utils import (
     validate_url as _validate_url,
     NetworkError,
     ValidationError,
-    truncate_text,
     sanitize_path,
-    FileOperationError,
 )
+from .search_engine import get_search_manager
 
 # Module metadata
 CATEGORY_NAME = "Web & Network"
-CATEGORY_DESCRIPTION = "Web search, page fetching, HTML parsing, downloads, HTTP API client, DNS lookup"
+CATEGORY_DESCRIPTION = (
+    "Web search, page fetching, HTML parsing, downloads, HTTP API client, DNS lookup"
+)
 TOOLS = [
     "web_search",
+    "web_search_advanced",
+    "web_search_news",
     "fetch_webpage",
     "fetch_webpage_text",
     "parse_html",
@@ -42,15 +46,19 @@ TOOLS = [
     "get_headers",
     "validate_url_format",
     "parse_url_components",
-    "web_search_news",
     "http_request",
     "get_network_info",
     "dns_lookup",
+    "clear_search_cache",
+    "get_search_stats",
 ]
 
 
-def register_tools(mcp):
+def register_tools(mcp: Any) -> None:
     """Register all web tools with the MCP server."""
+
+    # 获取搜索管理器实例
+    search_manager = get_search_manager()
 
     # Helper function for fetching webpages (not a tool itself)
     @retry(max_attempts=3, delay=1.0, exceptions=(requests.RequestException,))
@@ -74,7 +82,13 @@ def register_tools(mcp):
     @mcp.tool()
     def web_search(query: str, max_results: int = 10) -> str:
         """
-        Search the web using DuckDuckGo.
+        Search the web using multiple search engines with智能 fallback.
+
+        Features:
+        - Automatic fallback between search engines (DuckDuckGo -> Bing)
+        - Intelligent caching to reduce API calls
+        - Rate limiting protection
+        - Result deduplication
 
         Args:
             query: Search query string
@@ -83,40 +97,203 @@ def register_tools(mcp):
         Returns:
             JSON string containing search results with title, link, and snippet
         """
+        max_results = min(max_results, 20)
+
+        # 使用默认引擎列表进行搜索
+        result = search_manager.search(
+            query=query,
+            max_results=max_results,
+            engines=["duckduckgo", "bing"],  # 默认引擎顺序
+            parallel=False,  # 串行搜索（故障转移）
+            use_cache=True,
+            is_news=False,
+        )
+
+        # 格式化返回结果
+        if result["success"]:
+            return json.dumps(
+                {
+                    "results": result["results"],
+                    "count": result["count"],
+                    "query": query,
+                    "search_engine": (
+                        result["engines_used"][0] if result["engines_used"] else "Unknown"
+                    ),
+                    "cached": result.get("cached", False),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        else:
+            return json.dumps(
+                {
+                    "results": [],
+                    "message": "No results found",
+                    "error": result.get("error"),
+                    "errors": result.get("errors"),
+                },
+                ensure_ascii=False,
+            )
+
+    @mcp.tool()
+    def web_search_advanced(
+        query: str,
+        max_results: int = 10,
+        engines: str = "duckduckgo,bing",
+        parallel: bool = False,
+        use_cache: bool = True,
+    ) -> str:
+        """
+        Advanced web search with multi-engine support and parallel searching.
+
+        Features:
+        - Support for multiple search engines: DuckDuckGo, Bing, Google, Baidu
+        - Parallel searching across multiple engines
+        - Intelligent result merging and deduplication
+        - Smart caching mechanism
+        - Rate limiting protection
+
+        Args:
+            query: Search query string
+            max_results: Maximum number of results (default: 10, max: 50)
+            engines: Comma-separated list of engines (default: "duckduckgo,bing")
+                     Available: duckduckgo, bing, google, baidu
+            parallel: Search engines in parallel (default: False)
+            use_cache: Use cached results if available (default: True)
+
+        Returns:
+            JSON string containing combined search results
+
+        Example:
+            web_search_advanced("Python programming", 15, "duckduckgo,google", True)
+        """
+        max_results = min(max_results, 50)
+        engine_list = [e.strip().lower() for e in engines.split(",")]
+
+        # 执行搜索
+        result = search_manager.search(
+            query=query,
+            max_results=max_results,
+            engines=engine_list,
+            parallel=parallel,
+            use_cache=use_cache,
+            is_news=False,
+        )
+
+        return json.dumps(
+            {
+                "success": result["success"],
+                "results": result["results"],
+                "count": result["count"],
+                "query": query,
+                "engines_used": result["engines_used"],
+                "parallel": parallel,
+                "cached": result.get("cached", False),
+                "errors": result.get("errors"),
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    @mcp.tool()
+    def web_search_news(query: str, max_results: int = 10) -> str:
+        """
+        Search for news articles using multiple search engines with fallback.
+
+        Features:
+        - Automatic fallback between news search engines
+        - Intelligent caching
+        - Rate limiting protection
+        - Result deduplication
+
+        Args:
+            query: Search query string
+            max_results: Maximum number of results to return (default: 10, max: 20)
+
+        Returns:
+            JSON string containing news search results
+        """
+        max_results = min(max_results, 20)
+
+        # 使用新闻搜索
+        result = search_manager.search(
+            query=query,
+            max_results=max_results,
+            engines=["duckduckgo", "bing", "google"],
+            parallel=False,
+            use_cache=True,
+            is_news=True,
+        )
+
+        # 格式化返回结果
+        if result["success"]:
+            return json.dumps(
+                {
+                    "results": result["results"],
+                    "count": result["count"],
+                    "query": query,
+                    "type": "news",
+                    "search_engine": (
+                        result["engines_used"][0] if result["engines_used"] else "Unknown"
+                    ),
+                    "cached": result.get("cached", False),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        else:
+            return json.dumps(
+                {
+                    "results": [],
+                    "message": "No news results found",
+                    "error": result.get("error"),
+                    "errors": result.get("errors"),
+                },
+                ensure_ascii=False,
+            )
+
+    @mcp.tool()
+    def clear_search_cache() -> str:
+        """
+        Clear the search cache.
+
+        This will remove all cached search results, forcing fresh searches.
+
+        Returns:
+            JSON string with operation result
+        """
         try:
-            from duckduckgo_search import DDGS
-
-            max_results = min(max_results, 20)
-
-            with DDGS() as ddgs:
-                results = []
-                for i, result in enumerate(ddgs.text(query, max_results=max_results)):
-                    if i >= max_results:
-                        break
-                    results.append(
-                        {
-                            "title": result.get("title", ""),
-                            "link": result.get("href", ""),
-                            "snippet": result.get("body", ""),
-                        }
-                    )
-
-                if not results:
-                    return '{"results": [], "message": "No results found"}'
-
-                import json
-
-                return json.dumps(
-                    {"results": results, "count": len(results), "query": query},
-                    ensure_ascii=False,
-                    indent=2,
-                )
-
-        except ImportError:
-            return '{"error": "duckduckgo-search not installed. Install with: pip install duckduckgo-search"}'
+            search_manager.cache.clear()
+            return json.dumps(
+                {"success": True, "message": "Search cache cleared successfully"},
+                indent=2,
+            )
         except Exception as e:
-            logger.error(f"Web search failed: {e}")
-            return f'{{"error": "Search failed: {str(e)}"}}'
+            return json.dumps({"success": False, "error": str(e)})
+
+    @mcp.tool()
+    def get_search_stats() -> str:
+        """
+        Get search cache and rate limiter statistics.
+
+        Returns:
+            JSON string with cache stats, hit rate, and rate limiter info
+        """
+        try:
+            cache_stats = search_manager.cache.get_stats()
+            return json.dumps(
+                {
+                    "success": True,
+                    "cache": cache_stats,
+                    "rate_limiter": {
+                        "max_requests": search_manager.rate_limiter.max_requests,
+                        "window_seconds": search_manager.rate_limiter.window_seconds,
+                    },
+                },
+                indent=2,
+            )
+        except Exception as e:
+            return json.dumps({"success": False, "error": str(e)})
 
     @mcp.tool()
     def fetch_webpage(url: str, timeout: int = 10) -> str:
@@ -228,9 +405,7 @@ def register_tools(mcp):
             path = sanitize_path(save_path)
             path.parent.mkdir(parents=True, exist_ok=True)
 
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-            }
+            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
             response = requests.get(url, headers=headers, timeout=timeout, stream=True)
             response.raise_for_status()
@@ -329,12 +504,8 @@ def register_tools(mcp):
             return f'{{"error": "Invalid URL: {url}"}}'
 
         try:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-            }
-            response = requests.head(
-                url, headers=headers, timeout=timeout, allow_redirects=True
-            )
+            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+            response = requests.head(url, headers=headers, timeout=timeout, allow_redirects=True)
 
             import json
 
@@ -369,12 +540,8 @@ def register_tools(mcp):
             return f'{{"error": "Invalid URL: {url}"}}'
 
         try:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-            }
-            response = requests.head(
-                url, headers=headers, timeout=timeout, allow_redirects=True
-            )
+            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+            response = requests.head(url, headers=headers, timeout=timeout, allow_redirects=True)
 
             import json
 
@@ -461,7 +628,7 @@ def register_tools(mcp):
     @mcp.tool()
     def web_search_news(query: str, max_results: int = 10) -> str:
         """
-        Search for news articles using DuckDuckGo News.
+        Search for news articles using DuckDuckGo News with Bing News fallback.
 
         Args:
             query: Search query string
@@ -470,13 +637,18 @@ def register_tools(mcp):
         Returns:
             JSON string containing news search results
         """
-        try:
-            from duckduckgo_search import DDGS
+        import json
 
-            max_results = min(max_results, 20)
+        max_results = min(max_results, 20)
+        results = []
+        search_engine_used = None
+        error_messages = []
+
+        # Try DuckDuckGo News first
+        try:
+            from ddgs import DDGS
 
             with DDGS() as ddgs:
-                results = []
                 for i, result in enumerate(ddgs.news(query, max_results=max_results)):
                     if i >= max_results:
                         break
@@ -490,27 +662,46 @@ def register_tools(mcp):
                         }
                     )
 
-                if not results:
-                    return '{"results": [], "message": "No news results found"}'
-
-                import json
-
-                return json.dumps(
-                    {
-                        "results": results,
-                        "count": len(results),
-                        "query": query,
-                        "type": "news",
-                    },
-                    ensure_ascii=False,
-                    indent=2,
-                )
+                if results:
+                    search_engine_used = "DuckDuckGo News"
+                    logger.info(f"DuckDuckGo news search successful: {len(results)} results")
 
         except ImportError:
-            return '{"error": "duckduckgo-search not installed. Install with: pip install duckduckgo-search"}'
+            error_messages.append("ddgs package not installed")
+            logger.warning("ddgs package not installed, trying Bing News")
         except Exception as e:
-            logger.error(f"News search failed: {e}")
-            return f'{{"error": "News search failed: {str(e)}"}}'
+            error_messages.append(f"DuckDuckGo News failed: {str(e)}")
+            logger.error(f"DuckDuckGo news search failed: {e}")
+
+        # If DuckDuckGo failed or returned no results, try Bing News
+        if not results:
+            logger.info("Falling back to Bing News search")
+            results = _bing_search(query, max_results, is_news=True)
+            if results:
+                search_engine_used = "Bing News"
+
+        # Return results
+        if not results:
+            return json.dumps(
+                {
+                    "results": [],
+                    "message": "No news results found",
+                    "errors": error_messages,
+                },
+                ensure_ascii=False,
+            )
+
+        return json.dumps(
+            {
+                "results": results,
+                "count": len(results),
+                "query": query,
+                "type": "news",
+                "search_engine": search_engine_used,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
 
     @mcp.tool()
     def http_request(
@@ -564,9 +755,7 @@ def register_tools(mcp):
             # 限制响应大小
             MAX_RESPONSE_SIZE = 10 * 1024 * 1024  # 10MB
             if len(response.content) > MAX_RESPONSE_SIZE:
-                return json.dumps(
-                    {"error": f"Response too large: {len(response.content)} bytes"}
-                )
+                return json.dumps({"error": f"Response too large: {len(response.content)} bytes"})
 
             # 过滤敏感头
             safe_headers = {

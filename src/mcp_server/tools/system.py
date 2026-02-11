@@ -13,7 +13,7 @@ import os
 import sys
 import platform
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 import psutil
 
@@ -34,7 +34,7 @@ TOOLS = [
 ]
 
 
-def register_tools(mcp):
+def register_tools(mcp: Any) -> None:
     """Register all system tools with the MCP server."""
 
     @mcp.tool()

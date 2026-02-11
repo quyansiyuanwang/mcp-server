@@ -16,7 +16,7 @@ import random
 import string
 import secrets
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Any, Optional
 
 from dateutil import parser as date_parser
 
@@ -39,7 +39,7 @@ TOOLS = [
 ]
 
 
-def register_tools(mcp):
+def register_tools(mcp: Any) -> None:
     """Register all utility tools with the MCP server."""
 
     @mcp.tool()

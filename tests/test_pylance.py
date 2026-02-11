@@ -3,11 +3,9 @@
 
 import sys
 import json
-import tempfile
 import random
-import string
 from pathlib import Path
-from datetime import datetime
+from typing import Any, Callable, Dict
 
 sys.path.insert(0, str(Path(__file__).parent))
 from mcp_server.tools import (
@@ -21,38 +19,17 @@ from mcp_server.tools import (
 
 class MockMCP:
     """Mock MCP server for testing"""
-    def __init__(self):
-        self.tools = {}
+    def __init__(self) -> None:
+        self.tools: Dict[str, Callable[..., Any]] = {}
 
-    def tool(self):
-        def decorator(func):
+    def tool(self) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
             self.tools[func.__name__] = func
             return func
         return decorator
 
-class TestConfig:
-    """Test configuration - centralized settings"""
-    def __init__(self):
-        self.temp_dir = tempfile.mkdtemp(prefix="mcp_test_")
-        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    def get_temp_file(self, suffix=""):
-        """Generate temporary file path"""
-        return Path(self.temp_dir) / f"test_{self.timestamp}_{random.randint(1000, 9999)}{suffix}"
-
-    def generate_random_text(self, length=100):
-        """Generate random text content"""
-        words = [''.join(random.choices(string.ascii_lowercase, k=random.randint(3, 8)))
-                 for _ in range(length // 5)]
-        return ' '.join(words)
-
-    def cleanup(self):
-        """Clean up temporary files"""
-        import shutil
-        if Path(self.temp_dir).exists():
-            shutil.rmtree(self.temp_dir)
-
-def test_compression_tools(config):
+def test_compression_tools(config: Any) -> None:
     """Test compression tools with dynamic data"""
     print("=" * 60)
     print("Testing Compression Tools")
@@ -90,7 +67,7 @@ def test_compression_tools(config):
 
     print("\n[OK] Compression tools test completed")
 
-def test_config_tools(config):
+def test_config_tools(config: Any) -> None:
     """Test configuration file tools with dynamic data"""
     print("\n" + "=" * 60)
     print("Testing Configuration File Tools")
@@ -111,8 +88,8 @@ settings:
 
     print("\n1. Testing parse_yaml")
     result = mcp.tools['parse_yaml'](yaml_content)
-    data = json.loads(result)
-    print(f"   Success: {'project' in data}")
+    parsed_data = json.loads(result)
+    print(f"   Success: {'project' in parsed_data}")
 
     print("\n2. Testing yaml_to_json")
     result = mcp.tools['yaml_to_json'](yaml_content, 2)
@@ -131,7 +108,7 @@ settings:
 
     print("\n[OK] Configuration file tools test completed")
 
-def test_file_diff_tools(config):
+def test_file_diff_tools(config: Any) -> None:
     """Test file comparison tools with dynamic data"""
     print("\n" + "=" * 60)
     print("Testing File Comparison Tools")
@@ -162,7 +139,7 @@ def test_file_diff_tools(config):
 
     print("\n[OK] File comparison tools test completed")
 
-def test_security_tools(config):
+def test_security_tools(config: Any) -> None:
     """Test security tools with dynamic parameters"""
     print("\n" + "=" * 60)
     print("Testing Security Tools")
@@ -187,7 +164,7 @@ def test_security_tools(config):
 
     print("\n[OK] Security tools test completed")
 
-def test_text_similarity(config):
+def test_text_similarity(config: Any) -> None:
     """Test text similarity with dynamic data"""
     print("\n" + "=" * 60)
     print("Testing Text Similarity Tool")
@@ -212,30 +189,3 @@ def test_text_similarity(config):
     print(f"   Success: {data.get('success')}, Similarity: {data.get('similarity')}")
 
     print("\n[OK] Text similarity tool test completed")
-
-def main():
-    """Main test runner"""
-    config = TestConfig()
-
-    try:
-        print(f"\nTest Configuration:")
-        print(f"  Temp Directory: {config.temp_dir}")
-        print(f"  Timestamp: {config.timestamp}")
-        print()
-
-        test_compression_tools(config)
-        test_config_tools(config)
-        test_file_diff_tools(config)
-        test_security_tools(config)
-        test_text_similarity(config)
-
-        print("\n" + "=" * 60)
-        print("All Tests Completed Successfully")
-        print("=" * 60)
-
-    finally:
-        config.cleanup()
-        print(f"\nCleaned up temporary files")
-
-if __name__ == "__main__":
-    main()

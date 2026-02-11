@@ -10,7 +10,6 @@ Provides:
 """
 
 import logging
-import os
 import re
 import time
 from functools import wraps
@@ -166,7 +165,11 @@ def safe_get_file_size(path: Path) -> int:
 
 
 # Retry decorator
-def retry(max_attempts: int = 3, delay: float = 1.0, exceptions: tuple = (Exception,)):
+def retry(
+    max_attempts: int = 3,
+    delay: float = 1.0,
+    exceptions: tuple[type[Exception], ...] = (Exception,),
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     Retry decorator for functions that may fail transiently.
 
@@ -176,10 +179,10 @@ def retry(max_attempts: int = 3, delay: float = 1.0, exceptions: tuple = (Except
         exceptions: Tuple of exceptions to catch and retry
     """
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
-            last_exception = None
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            last_exception: Optional[Exception] = None
             for attempt in range(max_attempts):
                 try:
                     return func(*args, **kwargs)
@@ -192,10 +195,10 @@ def retry(max_attempts: int = 3, delay: float = 1.0, exceptions: tuple = (Except
                         )
                         time.sleep(delay)
                     else:
-                        logger.error(
-                            f"All {max_attempts} attempts failed for {func.__name__}: {e}"
-                        )
-            raise last_exception
+                        logger.error(f"All {max_attempts} attempts failed for {func.__name__}: {e}")
+            if last_exception is not None:
+                raise last_exception
+            raise RuntimeError("Retry logic failed without capturing exception")
 
         return wrapper
 
@@ -203,9 +206,7 @@ def retry(max_attempts: int = 3, delay: float = 1.0, exceptions: tuple = (Except
 
 
 # Safe file operations
-def safe_read_file(
-    path: str, encoding: str = "utf-8", max_size: int = 10 * 1024 * 1024
-) -> str:
+def safe_read_file(path: str, encoding: str = "utf-8", max_size: int = 10 * 1024 * 1024) -> str:
     """
     Safely read file contents with size limit.
 
@@ -231,9 +232,7 @@ def safe_read_file(
 
         file_size = safe_get_file_size(p)
         if file_size > max_size:
-            raise FileOperationError(
-                f"File too large: {file_size} bytes (max: {max_size} bytes)"
-            )
+            raise FileOperationError(f"File too large: {file_size} bytes (max: {max_size} bytes)")
 
         with open(p, "r", encoding=encoding) as f:
             return f.read()
@@ -325,11 +324,12 @@ def format_bytes(bytes_size: int) -> str:
     Returns:
         Formatted string (e.g., "1.5 MB")
     """
+    size_float: float = float(bytes_size)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if bytes_size < 1024.0:
-            return f"{bytes_size:.2f} {unit}"
-        bytes_size /= 1024.0
-    return f"{bytes_size:.2f} PB"
+        if size_float < 1024.0:
+            return f"{size_float:.2f} {unit}"
+        size_float /= 1024.0
+    return f"{size_float:.2f} PB"
 
 
 def format_timestamp(timestamp: float) -> str:
@@ -357,9 +357,7 @@ COMMAND_OUTPUT_MAX_SIZE = 10 * 1024 * 1024  # 10MB
 PYTHON_MAX_CODE_LENGTH = 100 * 1024  # 100KB
 
 
-def validate_archive_safety(
-    archive_path: Path, max_size: int = MAX_EXTRACT_SIZE
-) -> None:
+def validate_archive_safety(archive_path: Path, max_size: int = MAX_EXTRACT_SIZE) -> None:
     """
     Validate archive file safety to prevent ZIP bomb attacks.
 
@@ -390,9 +388,7 @@ def validate_archive_safety(
                 if compressed_size > 0:
                     ratio = total_size / compressed_size
                     if ratio > 100:  # More than 100:1 compression is suspicious
-                        raise ValidationError(
-                            f"Suspicious compression ratio: {ratio:.1f}:1"
-                        )
+                        raise ValidationError(f"Suspicious compression ratio: {ratio:.1f}:1")
 
         elif file_ext in [".tar", ".gz", ".bz2", ".tgz", ".tbz2"]:
             with tarfile.open(archive_path, "r:*") as tf:
@@ -465,10 +461,10 @@ def sanitize_command_output(output: str, max_size: int = COMMAND_OUTPUT_MAX_SIZE
 
     # Filter sensitive patterns (API keys, tokens, passwords)
     sensitive_patterns = [
-        (r'(api[_-]?key\s*=\s*)["\']?[\w-]+["\']?', r'\1***REDACTED***'),
-        (r'(token\s*=\s*)["\']?[\w-]+["\']?', r'\1***REDACTED***'),
-        (r'(password\s*=\s*)["\']?[\w-]+["\']?', r'\1***REDACTED***'),
-        (r'(Bearer\s+)[\w-]+', r'\1***REDACTED***'),
+        (r'(api[_-]?key\s*=\s*)["\']?[\w-]+["\']?', r"\1***REDACTED***"),
+        (r'(token\s*=\s*)["\']?[\w-]+["\']?', r"\1***REDACTED***"),
+        (r'(password\s*=\s*)["\']?[\w-]+["\']?', r"\1***REDACTED***"),
+        (r"(Bearer\s+)[\w-]+", r"\1***REDACTED***"),
     ]
 
     for pattern, replacement in sensitive_patterns:

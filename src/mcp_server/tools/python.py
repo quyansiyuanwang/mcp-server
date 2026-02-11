@@ -9,6 +9,7 @@ import ast
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 from ..command_executor import CommandExecutor
 from ..utils import (
@@ -33,7 +34,7 @@ TOOLS = [
 ]
 
 
-def register_tools(mcp):
+def register_tools(mcp: Any) -> None:
     """Register all Python development tools."""
 
     executor = CommandExecutor()
