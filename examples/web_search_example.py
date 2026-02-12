@@ -5,7 +5,7 @@
 """
 
 import json
-from mcp_server.tools.web import (
+from mcp_server.tools.web.handlers import (
     web_search,
     fetch_webpage_text,
     get_page_title,

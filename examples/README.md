@@ -89,4 +89,4 @@ pip install -e .
 
 - [完整文档](../docs/)
 - [Subagent 指南](../docs/zh/SUBAGENT_GUIDE.md)
-- [API 参考](../docs/API_REFERENCE.md)
+- [架构文档](../docs/en/ARCHITECTURE.md)

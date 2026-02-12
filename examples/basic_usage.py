@@ -5,7 +5,7 @@ MCP Server 基本使用示例
 """
 
 from fastmcp import FastMCP
-from mcp_server.tools import compression, web, file, data, text
+from mcp_server.tools import load_all_plugins
 from mcp_server.utils import logger
 
 
@@ -15,14 +15,13 @@ def main():
     # 创建 MCP 服务器实例
     mcp = FastMCP("Example MCP Server")
 
-    logger.info("正在注册工具...")
+    logger.info("正在加载工具插件...")
 
-    # 注册工具模块
-    compression.register_tools(mcp)
-    web.register_tools(mcp)
-    file.register_tools(mcp)
-    data.register_tools(mcp)
-    text.register_tools(mcp)
+    # 自动发现并加载所有工具插件
+    plugins = load_all_plugins()
+    for plugin in plugins:
+        plugin.register_to_mcp(mcp)
+        logger.info(f"已注册 {plugin.category_name} ({len(plugin.tools)} 个工具)")
 
     logger.info("工具注册完成！")
 
@@ -36,7 +35,7 @@ def main():
             {
                 "name": "Example MCP Server",
                 "version": "0.1.0",
-                "tools": ["compression", "web", "file", "data", "text"],
+                "tools": [plugin.category_name for plugin in load_all_plugins()],
             }
         )
 

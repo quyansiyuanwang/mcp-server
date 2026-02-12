@@ -7,7 +7,7 @@
 import json
 import tempfile
 from pathlib import Path
-from mcp_server.tools.file import (
+from mcp_server.tools.file.handlers import (
     read_file,
     write_file,
     list_directory,
