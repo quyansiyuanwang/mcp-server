@@ -1,7 +1,7 @@
 [project]
 name = "mcp-server"
 version = "0.1.0"
-description = "Comprehensive MCP server with 95+ practical tools across 10 categories"
+description = "Comprehensive MCP server with 83 practical tools across 8 categories"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
@@ -14,10 +14,8 @@ keywords = [
     "web-search",
     "file-operations",
     "data-processing",
-    "python-development",
     "system-utilities",
-    "uv",
-    "pylance",
+    "ai-orchestration",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
