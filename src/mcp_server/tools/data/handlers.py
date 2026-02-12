@@ -24,7 +24,7 @@ from mcp_server.utils import logger
 try:
     import yaml
 except ImportError:
-    yaml = None  # type: ignore[assignment]
+    yaml = None  # type: ignore[assignment]  # noqa: F841
 
 # Import TOML support (Python 3.11+ has built-in tomllib)
 if sys.version_info >= (3, 11):
@@ -489,7 +489,8 @@ def json_to_yaml(json_string: str) -> str:
 
     try:
         data = json.loads(json_string)
-        return yaml.dump(data, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        result: str = yaml.dump(data, default_flow_style=False, allow_unicode=True, sort_keys=False)
+        return result
     except json.JSONDecodeError as e:
         logger.error(f"JSON parsing failed: {e}")
         return f"Error: Invalid JSON: {str(e)}"

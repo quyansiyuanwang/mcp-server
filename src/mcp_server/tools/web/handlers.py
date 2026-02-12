@@ -46,7 +46,8 @@ def _fetch_webpage_helper(url: str, timeout: int = 10) -> str:
         }
         response = requests.get(url, headers=headers, timeout=timeout)
         response.raise_for_status()
-        return response.text
+        result: str = response.text
+        return result
 
     except requests.RequestException as e:
         logger.error(f"Failed to fetch webpage {url}: {e}")
@@ -423,7 +424,8 @@ def get_page_title(url: str, timeout: int = 10) -> str:
 
         title = soup.find("title")
         if title:
-            return title.get_text(strip=True)
+            text: str = title.get_text(strip=True)
+            return text
 
         return "No title found"
 
