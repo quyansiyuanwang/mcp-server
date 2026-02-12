@@ -157,7 +157,7 @@ jobs:
             handlers="$plugin_dir/handlers.py"
 
             # Parse category_name from config.yaml
-            category_name=$(python -c "import yaml; c=yaml.safe_load(open('$config')); print(c.get('category_name',''))")
+            category_name=$(uv run python -c "import yaml; c=yaml.safe_load(open('$config')); print(c.get('category_name',''))")
 
             # Count @tool_handler decorated functions in handlers.py
             tool_count=0
