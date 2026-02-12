@@ -194,23 +194,23 @@ def clean_build_artifacts():
             print(f"  Removing {file_path}")
             os.remove(file_path)
 
-    print("✅ Clean complete\n")
+    print("[Clean] Clean complete\n")
 
 
 def build_executable(onefile: bool = False) -> bool:
     """Build executable using PyInstaller."""
     plat = get_platform_info()
 
-    print(f"🔨 Building MCP Server for {plat['system']} ({plat['arch']})...\n")
+    print(f"[Build] Building MCP Server for {plat['system']} ({plat['arch']})...\n")
 
     # Check if PyInstaller is installed
     try:
         __import__("PyInstaller")
-        print("✅ PyInstaller is installed\n")
+        print("[OK] PyInstaller is installed\n")
     except ImportError:
-        print("❌ PyInstaller not found. Installing...")
+        print("[ERROR] PyInstaller not found. Installing...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "pyinstaller"])
-        print("✅ PyInstaller installed\n")
+        print("[OK] PyInstaller installed\n")
 
     # Prepare PyInstaller command
     cmd = [
@@ -226,26 +226,26 @@ def build_executable(onefile: bool = False) -> bool:
     # Add onefile option if requested
     if onefile:
         cmd.append("--onefile")
-        print("📦 Building as single executable file\n")
+        print("[Package] Building as single executable file\n")
     else:
         cmd.append("--onedir")
-        print("📦 Building as directory bundle\n")
+        print("[Package] Building as directory bundle\n")
 
     # Add hidden imports
     hidden_imports = get_hidden_imports()
-    print(f"📚 Adding {len(hidden_imports)} hidden imports...")
+    print(f"[Imports] Adding {len(hidden_imports)} hidden imports...")
     for module in hidden_imports:
         cmd.extend(["--hidden-import", module])
 
     # Add data files
     data_files = get_data_files()
-    print(f"📄 Adding {len(data_files)} data files...")
+    print(f"[Data] Adding {len(data_files)} data files...")
     for src, dest in data_files:
         cmd.extend(["--add-data", f"{src}{os.pathsep}{dest}"])
 
     # Add exclude modules (to reduce size)
     excludes = ["tkinter", "matplotlib", "numpy", "pandas", "PIL", "IPython", "jupyter"]
-    print(f"🚫 Excluding {len(excludes)} unnecessary modules...")
+    print(f"[Exclude] Excluding {len(excludes)} unnecessary modules...")
     for module in excludes:
         cmd.extend(["--exclude-module", module])
 
@@ -253,21 +253,21 @@ def build_executable(onefile: bool = False) -> bool:
     cmd.append("src/mcp_server/main.py")
 
     # Run PyInstaller
-    print(f"\n🚀 Running PyInstaller...\n")
+    print(f"\n[Run] Running PyInstaller...\n")
     print(f"Command: {' '.join(cmd[:5])} ... (and {len(cmd)-5} more args)\n")
 
     start = time.time()
     try:
         _ = subprocess.run(cmd, check=True, capture_output=False)
-        print("\n✅ Build successful!\n")
+        print("\n[OK] Build successful!\n")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"\n❌ Build failed with exit code {e.returncode}\n")
+        print(f"\n[ERROR] Build failed with exit code {e.returncode}\n")
         return False
     finally:
         end = time.time()
         duration = end - start
-        print(f"\n⏱ Build duration: {duration:.2f} seconds\n")
+        print(f"\n[Time] Build duration: {duration:.2f} seconds\n")
 
 
 def show_build_info():
@@ -283,20 +283,20 @@ def show_build_info():
 
     if onefile_path.exists():
         size_mb = onefile_path.stat().st_size / (1024 * 1024)
-        print(f"📦 Single executable built:")
+        print(f"[Package] Single executable built:")
         print(f"   Location: {onefile_path}")
         print(f"   Size: {size_mb:.1f} MB")
-        print(f"\n💡 Usage: {onefile_path}")
+        print(f"\n[Usage] Usage: {onefile_path}")
     elif exe_path.exists():
         dir_size = sum(f.stat().st_size for f in exe_path.parent.rglob("*") if f.is_file())
         size_mb = dir_size / (1024 * 1024)
-        print(f"📦 Directory bundle built:")
+        print(f"[Package] Directory bundle built:")
         print(f"   Location: {exe_path.parent}")
         print(f"   Executable: {exe_path}")
         print(f"   Total size: {size_mb:.1f} MB")
-        print(f"\n💡 Usage: {exe_path}")
+        print(f"\n[Usage] Usage: {exe_path}")
 
-    print(f"\n📋 To configure Claude Desktop:")
+    print(f"\n[Config] To configure Claude Desktop:")
     if plat["is_windows"]:
         config_path = os.path.expanduser("~/AppData/Roaming/Claude/claude_desktop_config.json")
     else:
@@ -356,13 +356,13 @@ Examples:
         show_build_info()
         print()
         print("=" * 70)
-        print("  Build Complete! 🎉")
+        print("  Build Complete!")
         print("=" * 70)
         return 0
     else:
         print()
         print("=" * 70)
-        print("  Build Failed! ❌")
+        print("  Build Failed!")
         print("=" * 70)
         return 1
 
