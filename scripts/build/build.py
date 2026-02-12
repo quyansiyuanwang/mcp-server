@@ -65,44 +65,34 @@ def find_site_packages():
     return Path(site.getsitepackages()[0])
 
 
-def get_hidden_imports():
-    """Get list of hidden imports needed for PyInstaller."""
+def get_collect_all_packages():
+    """Get list of packages to collect all submodules from."""
     return [
-        # FastMCP and related modules
-        "fastmcp",
-        "fastmcp.server",
-        "fastmcp.tools",
-        "fastmcp.resources",
-        "fastmcp.protocol",
-        "fastmcp.exceptions",
-        "fastmcp.cli",
-        # Rich library (used by FastMCP for console output)
-        "rich",
-        "rich.console",
-        "rich.panel",
-        "rich.table",
-        "rich.text",
-        "rich.align",
-        "rich.padding",
-        "rich.constrain",
-        "rich.segment",
-        "rich.cells",
-        "rich.measure",
-        "rich._unicode_data",
-        "rich._unicode_data.unicode17-0-0",
-        # Docket and Redis related (used by FastMCP)
-        "docket",
-        "docket.docket",
-        "docket._redis",
-        "fakeredis",
-        "fakeredis.commands_mixins",
-        "fakeredis.commands_mixins.scripting_mixin",
-        "lupa",
-        "lupa.lua51",
-        # Importlib metadata for package discovery
-        "importlib.metadata",
-        "importlib_metadata",
-        # All tool modules (both __init__ and handlers)
+        "fastmcp",  # FastMCP and all its submodules
+        "mcp",  # MCP protocol package
+        "httpx",  # HTTP client
+        "uvicorn",  # ASGI server
+        "websockets",  # WebSocket support
+        "pydantic",  # Data validation
+        "pydantic_core",  # Pydantic core
+        "rich",  # Console output
+        "anyio",  # Async I/O
+        "authlib",  # Authentication
+        "cyclopts",  # CLI framework
+        "jsonref",  # JSON references
+        "jsonschema_path",  # JSON schema
+        "openapi_pydantic",  # OpenAPI support
+        "pydocket",  # Redis simulation
+        "fakeredis",  # Fake Redis
+        "lupa",  # Lua integration
+        "sniffio",  # Async library detection
+    ]
+
+
+def get_hidden_imports():
+    """Get list of hidden imports needed for local modules."""
+    return [
+        # Local tool modules
         "mcp_server.tools.compression",
         "mcp_server.tools.compression.handlers",
         "mcp_server.tools.web",
@@ -122,32 +112,22 @@ def get_hidden_imports():
         "mcp_server.tools.subagent_config",
         "mcp_server.tools.search_engine",
         "mcp_server.tools.registry",
-        # Utility modules
+        # Local utility modules
         "mcp_server.utils",
         "mcp_server.command_executor",
         "mcp_server.cli",
         "mcp_server.cli.config",
-        # Third-party dependencies
+        # Additional third-party dependencies
         "psutil",
-        "psutil._psutil_windows",  # Windows-specific
-        "psutil._psutil_posix",  # POSIX-specific
         "yaml",
         "lxml",
         "lxml.etree",
         "lxml.html",
-        "beautifulsoup4",
         "bs4",
         "requests",
         "urllib3",
-        "urllib3.util",
-        "urllib3.util.retry",
         "ddgs",
-        "python_dateutil",
         "dateutil",
-        "dateutil.parser",
-        "dateutil.tz",
-        "tomli",
-        "tomllib",  # Python 3.11+
     ]
 
 
@@ -228,12 +208,17 @@ def build_executable(onefile: bool = False) -> bool:
         cmd.append("--onefile")
         print("[Package] Building as single executable file\n")
     else:
-        cmd.append("--onedir")
         print("[Package] Building as directory bundle\n")
 
-    # Add hidden imports
+    # Add collect-all packages (auto-discover all submodules)
+    collect_packages = get_collect_all_packages()
+    print(f"[Collect] Auto-collecting {len(collect_packages)} packages with all submodules...")
+    for package in collect_packages:
+        cmd.extend(["--collect-all", package])
+
+    # Add hidden imports (for local modules)
     hidden_imports = get_hidden_imports()
-    print(f"[Imports] Adding {len(hidden_imports)} hidden imports...")
+    print(f"[Imports] Adding {len(hidden_imports)} local hidden imports...")
     for module in hidden_imports:
         cmd.extend(["--hidden-import", module])
 
