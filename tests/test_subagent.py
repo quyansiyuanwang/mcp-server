@@ -12,10 +12,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from mcp_server.tools import subagent
 from mcp_server.tools.subagent import (
-    TokenCounter,
-    CostCalculator,
-    OpenAIClient,
     AnthropicClient,
+    OpenAIClient,
     SubagentManager,
     SubagentOrchestrator,
     get_subagent_manager,
@@ -34,73 +32,6 @@ class MockMCP:
             return func
 
         return decorator
-
-
-def test_token_counter() -> None:
-    """测试 Token 计数器"""
-    print("\n1. Testing TokenCounter:")
-
-    # 测试英文文本
-    text = "Hello world, this is a test."
-    tokens = TokenCounter.count_tokens(text)
-    print(f"   English text: '{text}'")
-    print(f"   Estimated tokens: {tokens}")
-    assert tokens > 0
-
-    # 测试中文文本
-    text_cn = "你好世界，这是一个测试。"
-    tokens_cn = TokenCounter.count_tokens(text_cn)
-    print(f"   Chinese text: '{text_cn}'")
-    print(f"   Estimated tokens: {tokens_cn}")
-    assert tokens_cn > 0
-
-    # 测试混合文本
-    text_mixed = "Hello 你好 world 世界"
-    tokens_mixed = TokenCounter.count_tokens(text_mixed)
-    print(f"   Mixed text: '{text_mixed}'")
-    print(f"   Estimated tokens: {tokens_mixed}")
-    assert tokens_mixed > 0
-
-    # 测试消息列表
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Hello!"},
-    ]
-    tokens_msgs = TokenCounter.count_messages_tokens(messages)
-    print(f"   Messages count: {len(messages)}")
-    print(f"   Estimated tokens: {tokens_msgs}")
-    assert tokens_msgs > 0
-
-    print("   [OK] TokenCounter tests passed")
-
-
-def test_cost_calculator() -> None:
-    """测试成本计算器"""
-    print("\n2. Testing CostCalculator:")
-
-    # 测试 GPT-3.5
-    cost = CostCalculator.calculate_cost("gpt-3.5-turbo", 1000, 500)
-    print(f"   GPT-3.5-turbo (1000 in, 500 out): ${cost['total_cost']}")
-    assert cost["input_cost"] > 0
-    assert cost["output_cost"] > 0
-    assert cost["total_cost"] == cost["input_cost"] + cost["output_cost"]
-
-    # 测试 GPT-4
-    cost = CostCalculator.calculate_cost("gpt-4", 1000, 500)
-    print(f"   GPT-4 (1000 in, 500 out): ${cost['total_cost']}")
-    assert cost["total_cost"] > 0
-
-    # 测试 Claude
-    cost = CostCalculator.calculate_cost("claude-3-5-sonnet-20241022", 1000, 500)
-    print(f"   Claude-3.5-Sonnet (1000 in, 500 out): ${cost['total_cost']}")
-    assert cost["total_cost"] > 0
-
-    # 测试未知模型
-    cost = CostCalculator.calculate_cost("unknown-model", 1000, 500)
-    print(f"   Unknown model (1000 in, 500 out): ${cost['total_cost']}")
-    assert cost["total_cost"] == 0.0
-
-    print("   [OK] CostCalculator tests passed")
 
 
 def test_openai_client_mock() -> None:
@@ -216,12 +147,10 @@ def test_subagent_manager_call_ai_mock() -> None:
             print(f"   Model: {result['model']}")
             print(f"   Result: {result['result']}")
             print(f"   Usage: {result['usage']}")
-            print(f"   Cost: ${result['cost']['total_cost']}")
             print(f"   Status: {result['status']}")
 
             assert result["status"] == "success"
             assert result["usage"]["total_tokens"] == 23
-            assert result["cost"]["total_cost"] > 0
 
     print("   [OK] SubagentManager.call_ai mock tests passed")
 
@@ -265,7 +194,6 @@ def test_subagent_orchestrator_mock() -> None:
             print(f"   Total tasks: {result['summary']['total_tasks']}")
             print(f"   Successful: {result['summary']['successful']}")
             print(f"   Failed: {result['summary']['failed']}")
-            print(f"   Total cost: ${result['summary']['total_cost']}")
             print(f"   Total tokens: {result['summary']['total_tokens']}")
 
             assert result["summary"]["total_tasks"] == 2
@@ -323,12 +251,10 @@ def test_subagent_call_tool_mock() -> None:
             print(f"   Status: {result['status']}")
             print(f"   Result: {result['result']}")
             print(f"   Usage: {result['usage']}")
-            print(f"   Cost: ${result['cost']['total_cost']}")
 
             assert result["status"] == "success"
             assert "result" in result
             assert "usage" in result
-            assert "cost" in result
 
     print("   [OK] subagent_call tool mock tests passed")
 
@@ -376,7 +302,6 @@ def test_subagent_parallel_tool_mock() -> None:
             result = json.loads(result_str)
             print(f"   Total tasks: {result['summary']['total_tasks']}")
             print(f"   Successful: {result['summary']['successful']}")
-            print(f"   Total cost: ${result['summary']['total_cost']}")
 
             assert result["summary"]["total_tasks"] == 2
             assert len(result["results"]) == 2
@@ -449,11 +374,11 @@ def test_subagent_conditional_tool_mock() -> None:
             print(f"   Condition evaluated as: {result['condition_result']['evaluated_as']}")
             print(f"   Branch taken: {result['branch_taken']}")
             print(f"   Final result: {result['final_result']['result']}")
-            print(f"   Total cost: ${result['total_cost']}")
+            print(f"   Total usage: {result['total_usage']}")
 
             assert result["status"] == "success"
             assert result["branch_taken"] == "true_branch"
-            assert "total_cost" in result
+            assert "total_usage" in result
 
     print("   [OK] subagent_conditional tool mock tests passed")
 
@@ -499,8 +424,6 @@ def run_all_tests() -> None:
     print("Testing Subagent AI Orchestration Tools")
     print("=" * 60)
 
-    test_token_counter()
-    test_cost_calculator()
     test_openai_client_mock()
     test_anthropic_client_mock()
     test_subagent_manager()

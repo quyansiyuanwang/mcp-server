@@ -3,37 +3,30 @@
 验证 main.py 是否正确从各个模块读取元数据
 """
 
-from mcp_server.main import get_all_tools_info, get_version_info, TOOL_MODULES
+from mcp_server.main import get_all_tools_info, get_version_info
+from mcp_server.tools import load_all_plugins
 
 
 def test_tool_modules_metadata() -> None:
-    """测试所有模块是否都有正确的元数据"""
+    """测试所有插件是否都有正确的元数据"""
     print("=" * 60)
-    print("测试模块元数据")
+    print("测试插件元数据")
     print("=" * 60)
 
-    for module_info in TOOL_MODULES:
-        module = module_info["module"]
-        category_key = module_info["category_key"]
+    plugins = load_all_plugins()
 
-        # 检查元数据是否存在
-        category_name = getattr(module, "CATEGORY_NAME", None)
-        category_desc = getattr(module, "CATEGORY_DESCRIPTION", None)
-        tools_list = getattr(module, "TOOLS", None)
-
-        print(f"\n模块: {module.__name__}")
-        print(f"  类别键: {category_key}")
-        print(f"  类别名: {category_name}")
-        print(f"  描述: {category_desc}")
-        print(f"  工具数量: {len(tools_list) if tools_list else 0}")
+    for plugin in plugins:
+        print(f"\n插件: {plugin.name}")
+        print(f"  类别名: {plugin.category_name}")
+        print(f"  描述: {plugin.category_description}")
+        print(f"  工具数量: {len(plugin.tools)}")
 
         # 验证元数据完整性
-        assert category_name is not None, f"{module.__name__} 缺少 CATEGORY_NAME"
-        assert category_desc is not None, f"{module.__name__} 缺少 CATEGORY_DESCRIPTION"
-        assert tools_list is not None, f"{module.__name__} 缺少 TOOLS"
-        assert len(tools_list) > 0, f"{module.__name__} 的 TOOLS 列表为空"
+        assert plugin.category_name, f"{plugin.name} 缺少 category_name"
+        assert plugin.category_description, f"{plugin.name} 缺少 category_description"
+        assert len(plugin.tools) > 0, f"{plugin.name} 的 tools 列表为空"
 
-    print("\n所有模块元数据验证通过!")
+    print("\n所有插件元数据验证通过!")
 
 
 def test_list_all_tools() -> None:
@@ -53,11 +46,11 @@ def test_list_all_tools() -> None:
         print(f"\n  {category_key}:")
         print(f"    名称: {category_info['name']}")
         print(f"    描述: {category_info['description']}")
-        print(f"    工具数: {category_info['count']}")
+        print(f"    工具数: {category_info['tool_count']}")
         print(f"    工具列表: {', '.join(category_info['tools'][:3])}...")
 
     # 验证总数
-    calculated_total = sum(cat["count"] for cat in data["categories"].values())
+    calculated_total = sum(cat["tool_count"] for cat in data["categories"].values())
     assert data["total_tools"] == calculated_total, "工具总数不匹配"
 
     print("\nlist_all_tools() 验证通过!")
@@ -82,10 +75,15 @@ def test_get_server_version() -> None:
     for i, feature in enumerate(data["features"], 1):
         print(f"  {i}. {feature}")
 
-    # 验证数据 (移除Python/UV/Pylance工具后: 104-21=83个工具, 11-3=8个类别)
-    assert data["total_tools"] == 83, f"工具总数应为 83,实际为 {data['total_tools']}"
-    assert data["total_categories"] == 8, f"类别总数应为 8,实际为 {data['total_categories']}"
-    assert len(data["features"]) == 8, f"特性数量应为 8,实际为 {len(data['features'])}"
+    # 动态验证：工具数和类别数应该大于 0
+    assert data["total_tools"] > 0, f"工具总数应大于 0,实际为 {data['total_tools']}"
+    assert data["total_categories"] > 0, f"类别总数应大于 0,实际为 {data['total_categories']}"
+    assert len(data["features"]) > 0, f"特性数量应大于 0,实际为 {len(data['features'])}"
+
+    # 类别数应与特性数一致
+    assert data["total_categories"] == len(
+        data["features"]
+    ), f"类别数 {data['total_categories']} 与特性数 {len(data['features'])} 不一致"
 
     print("\nget_server_version() 验证通过!")
 
