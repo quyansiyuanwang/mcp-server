@@ -9,11 +9,10 @@ import atexit
 import json
 import os
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from mcp_server.utils import (
     BrowserError,
-    BrowserTimeoutError,
     SecurityError,
     ValidationError,
     logger,
@@ -23,6 +22,7 @@ from mcp_server.utils import (
 # Browser configuration
 try:
     from .browser_config import get_browser_config
+
     _config_available = True
 except ImportError:
     _config_available = False
@@ -33,11 +33,8 @@ try:
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options as ChromeOptions
     from selenium.webdriver.chrome.service import Service as ChromeService
-    from selenium.webdriver.common.by import By
     from selenium.webdriver.edge.options import Options as EdgeOptions
     from selenium.webdriver.edge.service import Service as EdgeService
-    from selenium.webdriver.support import expected_conditions as EC
-    from selenium.webdriver.support.ui import Select, WebDriverWait
     from webdriver_manager.chrome import ChromeDriverManager
     from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
@@ -196,8 +193,8 @@ class BrowserSessionManager:
 
         # Parse window size
         try:
-            width, height = window_size.split("x")
-            width, height = int(width), int(height)
+            width_str, height_str = window_size.split("x")
+            width, height = int(width_str), int(height_str)
         except (ValueError, AttributeError):
             raise ValidationError(
                 f"Invalid window_size format '{window_size}'. Expected 'WxH' (e.g., '1920x1080')"
@@ -267,7 +264,7 @@ class BrowserSessionManager:
     def _create_chrome_driver(
         self,
         headless: bool,
-        window_size: tuple,
+        window_size: tuple[int, int],
         user_agent: str,
         proxy: str,
         extra_args: str,
@@ -307,7 +304,7 @@ class BrowserSessionManager:
             driver_path = browser_conf.get_chrome_driver_path()
         else:
             driver_path = os.environ.get("CHROME_DRIVER_PATH", "").strip()
-        
+
         if driver_path:
             logger.info(f"Using configured ChromeDriver path: {driver_path}")
             service = ChromeService(executable_path=driver_path)
@@ -339,7 +336,7 @@ class BrowserSessionManager:
     def _create_edge_driver(
         self,
         headless: bool,
-        window_size: tuple,
+        window_size: tuple[int, int],
         user_agent: str,
         proxy: str,
         extra_args: str,
@@ -379,7 +376,7 @@ class BrowserSessionManager:
             driver_path = browser_conf.get_edge_driver_path()
         else:
             driver_path = os.environ.get("EDGE_DRIVER_PATH", "").strip()
-        
+
         if driver_path:
             logger.info(f"Using configured EdgeDriver path: {driver_path}")
             service = EdgeService(executable_path=driver_path)
