@@ -81,8 +81,8 @@ python -m mcp_server.cli.config --claude
 
 ```bash
 # 克隆仓库
-git clone https://github.com/quyansiyuanwang/mcp-server.git
-cd mcp-server
+git clone https://github.com/quyansiyuanwang/oh-my-mcp.git
+cd oh-my-mcp
 
 # 安装开发依赖
 pip install -e ".[dev]"
@@ -111,7 +111,7 @@ pytest tests/
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install mcp-server
+pip install oh-my-mcp
 ```
 
 ## 下一步
