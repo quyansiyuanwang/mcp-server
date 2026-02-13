@@ -45,8 +45,8 @@ python scripts/build/build.py
 
 **输出位置**：
 
-- Windows: `dist/mcp-server/mcp-server.exe`
-- Linux: `dist/mcp-server/mcp-server`
+- Windows: `dist/oh-my-mcp/oh-my-mcp.exe`
+- Linux: `dist/oh-my-mcp/oh-my-mcp`
 
 **优点**：
 
@@ -70,8 +70,8 @@ python scripts/build/build.py -F
 
 **输出位置**：
 
-- Windows: `dist/mcp-server.exe`
-- Linux: `dist/mcp-server`
+- Windows: `dist/oh-my-mcp.exe`
+- Linux: `dist/oh-my-mcp`
 
 **优点**：
 
