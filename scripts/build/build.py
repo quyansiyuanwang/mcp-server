@@ -15,12 +15,19 @@ import argparse
 import glob
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 import time
 from typing import Any
+
+# Import tomli for reading pyproject.toml
+try:
+    import tomllib  # Python 3.11+
+except ImportError:
+    import tomli as tomllib  # Python 3.10 and below
 
 # Change to project root directory (two levels up from this script)
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -65,74 +72,132 @@ def find_site_packages():
     return Path(site.getsitepackages()[0])
 
 
+def parse_pyproject_dependencies() -> list[str]:
+    """Parse dependencies from pyproject.toml and extract package names."""
+    pyproject_path = PROJECT_ROOT / "pyproject.toml"
+    
+    if not pyproject_path.exists():
+        print("[Warning] pyproject.toml not found, using default packages")
+        return []
+    
+    with open(pyproject_path, "rb") as f:
+        data = tomllib.load(f)
+    
+    dependencies = data.get("project", {}).get("dependencies", [])
+    
+    # Extract package names from dependency specifications
+    # e.g., "requests>=2.31.0" -> "requests"
+    # e.g., "tomli>=2.0.0; python_version < '3.11'" -> "tomli"
+    package_names = []
+    for dep in dependencies:
+        # Remove version specifiers and conditions
+        match = re.match(r"^([a-zA-Z0-9_-]+)", dep.split(";")[0])
+        if match:
+            package_name = match.group(1)
+            # Normalize package names (e.g., beautifulsoup4 -> bs4)
+            if package_name == "beautifulsoup4":
+                package_names.append("bs4")
+            elif package_name == "python-dateutil":
+                package_names.append("dateutil")
+            else:
+                package_names.append(package_name)
+    
+    return package_names
+
+
 def get_collect_all_packages():
-    """Get list of packages to collect all submodules from."""
-    return [
+    """Get list of packages to collect all submodules from (auto-detected from pyproject.toml)."""
+    
+    # Core MCP packages that need full collection
+    core_packages = [
         "fastmcp",  # FastMCP and all its submodules
         "mcp",  # MCP protocol package
-        "httpx",  # HTTP client
-        "uvicorn",  # ASGI server
-        "websockets",  # WebSocket support
-        "pydantic",  # Data validation
-        "pydantic_core",  # Pydantic core
-        "rich",  # Console output
-        "anyio",  # Async I/O
-        "authlib",  # Authentication
-        "cyclopts",  # CLI framework
-        "jsonref",  # JSON references
-        "jsonschema_path",  # JSON schema
-        "openapi_pydantic",  # OpenAPI support
-        "pydocket",  # Redis simulation
-        "fakeredis",  # Fake Redis
-        "lupa",  # Lua integration
-        "sniffio",  # Async library detection
     ]
+    
+    # Read dependencies from pyproject.toml
+    project_dependencies = parse_pyproject_dependencies()
+    
+    print(f"[Auto-detect] Found {len(project_dependencies)} dependencies in pyproject.toml")
+    
+    # Combine core packages with project dependencies
+    all_packages = list(set(core_packages + project_dependencies))
+    
+    # Add extra packages that need special handling
+    # rich needs all its submodules including _unicode_data
+    if "rich" not in all_packages:
+        all_packages.append("rich")
+    
+    # Remove packages that should not be collected entirely
+    exclude_from_collect = []  # Add packages to exclude if needed
+    
+    all_packages = [pkg for pkg in all_packages if pkg not in exclude_from_collect]
+    
+    return all_packages
 
 
 def get_hidden_imports():
-    """Get list of hidden imports needed for local modules."""
-    return [
-        # Local tool modules
-        "mcp_server.tools.compression",
-        "mcp_server.tools.compression.handlers",
-        "mcp_server.tools.web",
-        "mcp_server.tools.web.handlers",
-        "mcp_server.tools.file",
-        "mcp_server.tools.file.handlers",
-        "mcp_server.tools.data",
-        "mcp_server.tools.data.handlers",
-        "mcp_server.tools.text",
-        "mcp_server.tools.text.handlers",
-        "mcp_server.tools.system",
-        "mcp_server.tools.system.handlers",
-        "mcp_server.tools.utility",
-        "mcp_server.tools.utility.handlers",
-        "mcp_server.tools.subagent",
-        "mcp_server.tools.subagent.handlers",
-        "mcp_server.tools.subagent_config",
-        "mcp_server.tools.search_engine",
-        "mcp_server.tools.registry",
-        # Local utility modules
-        "mcp_server.utils",
-        "mcp_server.command_executor",
-        "mcp_server.cli",
-        "mcp_server.cli.config",
-        # Additional third-party dependencies
-        "psutil",
-        "yaml",
-        "lxml",
-        "lxml.etree",
-        "lxml.html",
-        "bs4",
-        "requests",
-        "urllib3",
-        "ddgs",
-        "dateutil",
-    ]
+    """Get list of hidden imports needed for local modules (fully auto-detected)."""
+    hidden_imports = []
+    
+    # Auto-detect tool plugins from tools directory
+    tools_dir = PROJECT_ROOT / "src" / "mcp_server" / "tools"
+    print(f"[Auto-detect] Scanning tools directory: {tools_dir}")
+    
+    if not tools_dir.exists():
+        print(f"[Warning] Tools directory not found: {tools_dir}")
+        return hidden_imports
+    
+    for config_yaml in tools_dir.glob("*/config.yaml"):
+        plugin_name = config_yaml.parent.name
+        plugin_dir = config_yaml.parent
+        
+        # Add plugin package
+        hidden_imports.append(f"mcp_server.tools.{plugin_name}")
+        
+        # Add handlers module if it exists
+        if (plugin_dir / "handlers.py").exists():
+            hidden_imports.append(f"mcp_server.tools.{plugin_name}.handlers")
+        
+        # Auto-detect all Python modules in plugin directory
+        for py_file in plugin_dir.glob("*.py"):
+            if py_file.name not in ["__init__.py", "handlers.py"]:
+                module_name = py_file.stem
+                hidden_imports.append(f"mcp_server.tools.{plugin_name}.{module_name}")
+                print(f"  Found plugin module: {plugin_name}.{module_name}")
+        
+        print(f"  Detected plugin: {plugin_name}")
+    
+    # Auto-detect other modules in tools directory (non-plugin .py files)
+    for py_file in tools_dir.glob("*.py"):
+        if py_file.name != "__init__.py":
+            module_name = py_file.stem
+            hidden_imports.append(f"mcp_server.tools.{module_name}")
+            print(f"  Found tools module: {module_name}")
+    
+    # Auto-detect CLI modules
+    cli_dir = PROJECT_ROOT / "src" / "mcp_server" / "cli"
+    if cli_dir.exists():
+        hidden_imports.append("mcp_server.cli")
+        for py_file in cli_dir.glob("*.py"):
+            if py_file.name != "__init__.py":
+                module_name = py_file.stem
+                hidden_imports.append(f"mcp_server.cli.{module_name}")
+                print(f"  Found CLI module: {module_name}")
+    
+    # Auto-detect root-level mcp_server modules
+    root_modules = ["utils", "command_executor"]
+    for module_name in root_modules:
+        module_path = PROJECT_ROOT / "src" / "mcp_server" / f"{module_name}.py"
+        if module_path.exists():
+            hidden_imports.append(f"mcp_server.{module_name}")
+            print(f"  Found root module: {module_name}")
+    
+    print(f"[Auto-detect] Total hidden imports: {len(hidden_imports)}")
+    return hidden_imports
 
 
 def get_data_files() -> list[Any]:
-    """Get list of data files to include."""
+    """Get list of data files to include (auto-detected)."""
     site_packages = find_site_packages()
     data_files: list[Any] = []
 
@@ -140,19 +205,22 @@ def get_data_files() -> list[Any]:
     fastmcp_dist = list(site_packages.glob("fastmcp-*.dist-info"))
     for dist_info in fastmcp_dist:
         data_files.append((str(dist_info), dist_info.name))
+        print(f"  Including dist-info: {dist_info.name}")
 
-    # Include fakeredis commands.json
+    # Include fakeredis commands.json if it exists
     fakeredis_json = site_packages / "fakeredis" / "commands.json"
     if fakeredis_json.exists():
         data_files.append((str(fakeredis_json), "fakeredis"))
+        print(f"  Including fakeredis commands.json")
 
-    # Include plugin config.yaml files for tool discovery
+    # Auto-detect and include plugin config.yaml files for tool discovery
     tools_dir = PROJECT_ROOT / "src" / "mcp_server" / "tools"
-    for config_yaml in tools_dir.glob("*/config.yaml"):
-        plugin_name = config_yaml.parent.name
-        dest = os.path.join("mcp_server", "tools", plugin_name)
-        data_files.append((str(config_yaml), dest))
-        print(f"  Including plugin config: {plugin_name}/config.yaml")
+    if tools_dir.exists():
+        for config_yaml in tools_dir.glob("*/config.yaml"):
+            plugin_name = config_yaml.parent.name
+            dest = os.path.join("mcp_server", "tools", plugin_name)
+            data_files.append((str(config_yaml), dest))
+            print(f"  Including plugin config: {plugin_name}/config.yaml")
 
     return data_files
 
@@ -212,27 +280,32 @@ def build_executable(onefile: bool = False) -> bool:
 
     # Add collect-all packages (auto-discover all submodules)
     collect_packages = get_collect_all_packages()
-    print(f"[Collect] Auto-collecting {len(collect_packages)} packages with all submodules...")
+    print(f"[Collect] Auto-collecting {len(collect_packages)} packages with all submodules:")
     for package in collect_packages:
+        print(f"  - {package}")
         cmd.extend(["--collect-all", package])
+    print()
 
-    # Add hidden imports (for local modules)
+    # Add hidden imports (for local modules only)
     hidden_imports = get_hidden_imports()
-    print(f"[Imports] Adding {len(hidden_imports)} local hidden imports...")
+    print(f"[Imports] Adding {len(hidden_imports)} local hidden imports")
     for module in hidden_imports:
         cmd.extend(["--hidden-import", module])
+    print()
 
     # Add data files
     data_files = get_data_files()
-    print(f"[Data] Adding {len(data_files)} data files...")
+    print(f"[Data] Adding {len(data_files)} data files")
     for src, dest in data_files:
         cmd.extend(["--add-data", f"{src}{os.pathsep}{dest}"])
+    print()
 
     # Add exclude modules (to reduce size)
     excludes = ["tkinter", "matplotlib", "numpy", "pandas", "PIL", "IPython", "jupyter"]
-    print(f"[Exclude] Excluding {len(excludes)} unnecessary modules...")
+    print(f"[Exclude] Excluding {len(excludes)} unnecessary modules")
     for module in excludes:
         cmd.extend(["--exclude-module", module])
+    print()
 
     # Add main script
     cmd.append("src/mcp_server/main.py")
@@ -324,7 +397,7 @@ Examples:
 
     # Show header
     print("=" * 70)
-    print("  MCP Server Build Script")
+    print("  MCP Server Build Script (Fully Automated)")
     print("=" * 70)
     print()
 
