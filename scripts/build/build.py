@@ -23,11 +23,7 @@ from pathlib import Path
 import time
 from typing import Any
 
-# Import tomli for reading pyproject.toml
-try:
-    import tomllib  # Python 3.11+
-except ImportError:
-    import tomli as tomllib  # Python 3.10 and below
+import tomllib  # Python 3.11+
 
 # Change to project root directory (two levels up from this script)
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -75,16 +71,16 @@ def find_site_packages():
 def parse_pyproject_dependencies() -> list[str]:
     """Parse dependencies from pyproject.toml and extract package names."""
     pyproject_path = PROJECT_ROOT / "pyproject.toml"
-    
+
     if not pyproject_path.exists():
         print("[Warning] pyproject.toml not found, using default packages")
         return []
-    
+
     with open(pyproject_path, "rb") as f:
         data = tomllib.load(f)
-    
+
     dependencies = data.get("project", {}).get("dependencies", [])
-    
+
     # Extract package names from dependency specifications
     # e.g., "requests>=2.31.0" -> "requests"
     # e.g., "tomli>=2.0.0; python_version < '3.11'" -> "tomli"
@@ -101,79 +97,81 @@ def parse_pyproject_dependencies() -> list[str]:
                 package_names.append("dateutil")
             else:
                 package_names.append(package_name)
-    
+
     return package_names
 
 
 def get_collect_all_packages():
     """Get list of packages to collect all submodules from (auto-detected from pyproject.toml)."""
-    
+
     # Core MCP packages that need full collection
     core_packages = [
         "fastmcp",  # FastMCP and all its submodules
         "mcp",  # MCP protocol package
+        "lupa",  # Lua runtime for fakeredis (has binary components)
+        "fakeredis",  # Redis simulation
     ]
-    
+
     # Read dependencies from pyproject.toml
     project_dependencies = parse_pyproject_dependencies()
-    
+
     print(f"[Auto-detect] Found {len(project_dependencies)} dependencies in pyproject.toml")
-    
+
     # Combine core packages with project dependencies
     all_packages = list(set(core_packages + project_dependencies))
-    
+
     # Add extra packages that need special handling
     # rich needs all its submodules including _unicode_data
     if "rich" not in all_packages:
         all_packages.append("rich")
-    
+
     # Remove packages that should not be collected entirely
     exclude_from_collect = []  # Add packages to exclude if needed
-    
+
     all_packages = [pkg for pkg in all_packages if pkg not in exclude_from_collect]
-    
+
     return all_packages
 
 
 def get_hidden_imports():
     """Get list of hidden imports needed for local modules (fully auto-detected)."""
     hidden_imports = []
-    
+
     # Auto-detect tool plugins from tools directory
     tools_dir = PROJECT_ROOT / "src" / "mcp_server" / "tools"
     print(f"[Auto-detect] Scanning tools directory: {tools_dir}")
-    
+
     if not tools_dir.exists():
         print(f"[Warning] Tools directory not found: {tools_dir}")
         return hidden_imports
-    
+
     for config_yaml in tools_dir.glob("*/config.yaml"):
         plugin_name = config_yaml.parent.name
         plugin_dir = config_yaml.parent
-        
+
         # Add plugin package
         hidden_imports.append(f"mcp_server.tools.{plugin_name}")
-        
+
         # Add handlers module if it exists
         if (plugin_dir / "handlers.py").exists():
             hidden_imports.append(f"mcp_server.tools.{plugin_name}.handlers")
-        
+
         # Auto-detect all Python modules in plugin directory
         for py_file in plugin_dir.glob("*.py"):
             if py_file.name not in ["__init__.py", "handlers.py"]:
                 module_name = py_file.stem
                 hidden_imports.append(f"mcp_server.tools.{plugin_name}.{module_name}")
                 print(f"  Found plugin module: {plugin_name}.{module_name}")
-        
+
         print(f"  Detected plugin: {plugin_name}")
-    
+
     # Auto-detect other modules in tools directory (non-plugin .py files)
     for py_file in tools_dir.glob("*.py"):
         if py_file.name != "__init__.py":
             module_name = py_file.stem
             hidden_imports.append(f"mcp_server.tools.{module_name}")
             print(f"  Found tools module: {module_name}")
-    
+
     # Auto-detect CLI modules
     cli_dir = PROJECT_ROOT / "src" / "mcp_server" / "cli"
     if cli_dir.exists():
@@ -183,7 +181,7 @@ def get_hidden_imports():
                 module_name = py_file.stem
                 hidden_imports.append(f"mcp_server.cli.{module_name}")
                 print(f"  Found CLI module: {module_name}")
-    
+
     # Auto-detect root-level mcp_server modules
     root_modules = ["utils", "command_executor"]
     for module_name in root_modules:
@@ -191,7 +189,7 @@ def get_hidden_imports():
         if module_path.exists():
             hidden_imports.append(f"mcp_server.{module_name}")
             print(f"  Found root module: {module_name}")
-    
+
     print(f"[Auto-detect] Total hidden imports: {len(hidden_imports)}")
     return hidden_imports
 
