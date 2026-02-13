@@ -58,3 +58,6 @@ uv.lock
 
 # Pyinstaller
 *.spec
+
+# AI-related
+CLAUDE.md
