@@ -140,7 +140,7 @@ scripts/build/build.sh --clean --onefile
 ```json
 {
   "mcpServers": {
-    "comprehensive-mcp": {
+    "oh-my-mcp": {
       "command": "D:\\Developments\\oh-my-mcp\\dist\\oh-my-mcp\\oh-my-mcp.exe"
     }
   }
@@ -160,7 +160,7 @@ scripts/build/build.sh --clean --onefile
 ```json
 {
   "mcpServers": {
-    "comprehensive-mcp": {
+    "oh-my-mcp": {
       "command": "/path/to/oh-my-mcp/dist/oh-my-mcp/oh-my-mcp"
     }
   }
@@ -193,7 +193,7 @@ scripts/build/build.sh --clean --onefile
 
 ```
 ============================================================
-Starting Comprehensive MCP Server v0.1.0
+Starting oh-my-mcp v0.1.0
 ============================================================
 ...
 Server ready to accept connections.

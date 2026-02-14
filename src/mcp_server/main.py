@@ -1,5 +1,5 @@
 """
-Comprehensive MCP Server with Practical Tools
+oh-my-mcp - MCP Server with Practical Tools
 
 This MCP server provides 116 tools across 9 categories.
 Tool counts and descriptions are dynamically loaded from each plugin.
@@ -41,13 +41,13 @@ def get_version() -> str:
         return "0.1.0"
 
 
-# Create the comprehensive MCP server
-mcp = FastMCP("Comprehensive MCP Server with Practical Tools")
+# Create the MCP server
+mcp = FastMCP("oh-my-mcp")
 
 # Log startup
 version = get_version()
 logger.info("=" * 60)
-logger.info(f"Starting Comprehensive MCP Server v{version}")
+logger.info(f"Starting oh-my-mcp v{version}")
 logger.info("=" * 60)
 
 # Load and register all tool plugins
@@ -78,7 +78,7 @@ def get_all_tools_info() -> dict[str, Any]:
 
     return {
         "server": {
-            "name": "Comprehensive MCP Server",
+            "name": "oh-my-mcp",
             "version": get_version(),
             "description": f"MCP server with {total_tools}+ practical tools",
         },
@@ -105,7 +105,7 @@ def get_version_info() -> dict[str, Any]:
     features = [plugin.category_description for plugin in plugins if plugin.category_description]
 
     return {
-        "name": "Comprehensive MCP Server",
+        "name": "oh-my-mcp",
         "version": get_version(),
         "description": f"MCP server with {total_tools}+ practical tools across {len(plugins)} categories",
         "features": features,

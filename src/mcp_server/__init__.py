@@ -1,5 +1,5 @@
 """
-Comprehensive MCP Server with practical tools and utilities.
+oh-my-mcp - MCP Server with practical tools and utilities.
 
 This module provides a collection of tools organized by category:
 - Web & Network: Search, fetch, parse web content

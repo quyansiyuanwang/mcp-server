@@ -30,7 +30,7 @@ def get_server_path() -> str:
 
 
 def generate_mcp_config(
-    server_name: str = "comprehensive-mcp",
+    server_name: str = "oh-my-mcp",
     python_path: Optional[str] = None,
     server_path: Optional[str] = None,
 ) -> dict[str, Any]:
@@ -57,7 +57,7 @@ def generate_mcp_config(
                 "command": python_path,
                 "args": [server_path],
                 "env": {},
-                "description": "Comprehensive MCP Server with 116 practical tools",
+                "description": "oh-my-mcp - MCP Server with 116 practical tools",
             }
         }
     }
@@ -136,7 +136,7 @@ class ConfigHTTPHandler(BaseHTTPRequestHandler):
 
         elif self.path == "/info":
             info = {
-                "server": "Comprehensive MCP Server Configuration Generator",
+                "server": "oh-my-mcp Configuration Generator",
                 "version": "0.1.0",
                 "endpoints": {
                     "/": "Get MCP configuration JSON",
@@ -194,8 +194,8 @@ def main() -> None:
 
     parser.add_argument(
         "--server-name",
-        default="comprehensive-mcp",
-        help="Name for the MCP server in configuration (default: comprehensive-mcp)",
+        default="oh-my-mcp",
+        help="Name for the MCP server in configuration (default: oh-my-mcp)",
     )
 
     parser.add_argument(

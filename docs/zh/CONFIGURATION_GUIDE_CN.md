@@ -92,11 +92,11 @@ python -m mcp_server.cli.config --server-name my-mcp-tools --output config.json
 ```json
 {
   "mcpServers": {
-    "comprehensive-mcp": {
+    "oh-my-mcp": {
       "command": "D:\\path\\to\\python.exe",
       "args": ["-m", "mcp_server.main"],
       "env": {},
-      "description": "Comprehensive MCP Server with 116 practical tools"
+      "description": "oh-my-mcp - MCP Server with 116 practical tools"
     }
   }
 }
@@ -152,7 +152,7 @@ python -m mcp_server.main
 python -m mcp_server.cli.config [选项]
 
 选项：
-  --server-name NAME    自定义服务器名称（默认：comprehensive-mcp）
+  --server-name NAME    自定义服务器名称（默认：oh-my-mcp）
   --output FILE, -o     输出文件路径（默认：mcp_config.json）
   --claude              安装到 Claude Desktop 配置
   --http-server         运行 HTTP 配置服务器
@@ -197,7 +197,7 @@ python -m mcp_server.main
 
 ```
 ============================================================
-Starting Comprehensive MCP Server v0.1.0
+Starting oh-my-mcp v0.1.0
 ============================================================
 Registering Web & Network tools...
 Registering File System tools...

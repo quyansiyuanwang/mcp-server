@@ -1,4 +1,4 @@
-# Comprehensive MCP Server
+# oh-my-mcp
 
 A powerful Model Context Protocol (MCP) server with **116 practical tools** across 9 categories, built using [FastMCP](https://github.com/jlowin/fastmcp).
 
@@ -11,7 +11,7 @@ A powerful Model Context Protocol (MCP) server with **116 practical tools** acro
 
 ## 🚀 Features
 
-This comprehensive MCP server provides tools for:
+oh-my-mcp provides tools for:
 
 - **📦 Compression** (5 tools): ZIP/TAR compression and extraction with security features
 - **🌐 Web & Network** (18 tools): Web search, page fetching, HTML parsing, downloads, HTTP API client, DNS lookup
@@ -297,4 +297,4 @@ curl http://localhost:8765/info
 
 ---
 
-Enjoy your comprehensive MCP server! 🚀
+Enjoy oh-my-mcp! 🚀
